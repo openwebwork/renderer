@@ -1,5 +1,4 @@
 FROM ubuntu:20.04
-LABEL org.opencontainers.image.source=https://github.com/drdrew42/renderer
 MAINTAINER drdrew42
 
 WORKDIR /usr/app
@@ -52,12 +51,3 @@ RUN apt-get update \
 RUN cpanm install Mojo::Base Statistics::R::IO::Rserve Date::Format Future::AsyncAwait Crypt::JWT IO::Socket::SSL CGI::Cookie \
     && rm -fr ./cpanm /root/.cpanm /tmp/*
 
-COPY . .
-
-RUN cd lib/PG/htdocs && npm install && cd ../../.. && npm install
-
-EXPOSE 3000
-
-HEALTHCHECK CMD curl -I localhost:3000/health
-
-CMD hypnotoad -f ./script/render_app

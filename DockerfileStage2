@@ -1,0 +1,18 @@
+FROM renderer-base:latest
+LABEL org.opencontainers.image.source=https://github.com/drdrew42/renderer
+MAINTAINER drdrew42
+
+WORKDIR /usr/app
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/New_York
+
+
+COPY . .
+
+RUN cd lib/PG/htdocs && npm install && cd ../../.. && npm install
+
+EXPOSE 3000
+
+HEALTHCHECK CMD curl -I localhost:3000/health
+
+CMD hypnotoad -f ./script/render_app

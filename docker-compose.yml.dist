@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+  renderer:
+    image: renderer:latest
+    container_name: standalone-renderer
+
+    build:
+      # For use/building when docker-compose.yml is in the container directory
+      context: .
+      # For use/building when docker-compose.yml is OUTSIDE the container directory.
+      #context: /Path_To/container/
+
+      # If you would like a 1 stage build process comment out the next line, and just run "docker-compose build".
+      dockerfile: DockerfileStage2
+
+      # For the 2 stage build process:
+      # Stage 1 - base image with OS + CPAN packages
+      #      docker build --no-cache --tag renderer-base:latest -f container/DockerfileStage1 .
+      #   You can add something like
+      #       --build-arg ADDITIONAL_BASE_IMAGE_PACKAGES="vim-tiny"
+      #   to add additional packages to the base image
+      # Stage 2 - add the renderer to the base image
+      #      docker-compose build --no-cache
+
+    volumes:
+
+      # Local render_app.conf if needed:
+      #- "./render_app.conf:/usr/app/render_app.conf"
+
+      # OPL - from standard location
+      - "../volumes/webwork-open-problem-library:/usr/app/webwork-open-problem-library"
+
+      # Private problem directories - from standard location
+      #- "./volumes/private:/usr/app/private"
+
+    #hostname: myhost.mydomain.edu
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      MOJO_MODE: development
+
+      # The system timezone for the container can be set using
+      #SYSTEM_TIMEZONE: zone/city
+      # where zone/city must be a valid setting.
+      # "/usr/bin/timedatectl list-timezones" on an Ubuntu system with
+      # that tool installed will find valid values.
