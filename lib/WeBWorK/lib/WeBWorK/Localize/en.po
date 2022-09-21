@@ -15,51 +15,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. (wwRound(0, $answerScore*100)
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:255
+#. (wwRound(0, $answerScore * 100)
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:276
 msgid "%1% correct"
 msgstr ""
 
 #. ($numBlanks)
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:395
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:425
 msgid "%quant(%1,of the questions remains,of the questions remain) unanswered."
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1277 PG/macros/PGbasicmacros.pl:1286
+#: PG/macros/PGbasicmacros.pl:1278 PG/macros/PGbasicmacros.pl:1287
 msgid ""
 "(Instructor hint preview: show the student hint after the following number "
 "of attempts:"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:386
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:413
 msgid "All of the answers above are correct."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:384
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:410
 msgid "All of the gradeable answers above are correct."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:289
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:308
 msgid "Answer Preview"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:391
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:417
 msgid "At least one of the answers above is NOT correct."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:291
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:310
 msgid "Correct Answer"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:288
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:307
 msgid "Entered"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:238
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:261
 msgid "FeedbackMessage"
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:185 PG/macros/problemRandomize.pl:186
+#: PG/macros/problemRandomize.pl:184 PG/macros/problemRandomize.pl:185
 msgid "Get a new version of this problem"
 msgstr ""
 
@@ -72,67 +72,67 @@ msgstr ""
 msgid "Go on to next part"
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:409
+#: PG/macros/problemRandomize.pl:408
 msgid "Hardcopy will always print the original version of the problem."
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1558
+#: PG/macros/PGbasicmacros.pl:1560
 msgid "Hint:"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1558
+#: PG/macros/PGbasicmacros.pl:1560
 msgid "Hint: "
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:408
+#: PG/macros/problemRandomize.pl:407
 msgid "If you come back to it later, it may revert to its original version."
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1226
+#: PG/macros/PGbasicmacros.pl:1228
 msgid "Instructor solution preview: show the student solution after due date."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:292
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:311
 msgid "Message"
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:382 PG/macros/problemRandomize.pl:407
+#: PG/macros/problemRandomize.pl:381 PG/macros/problemRandomize.pl:406
 msgid "Note:"
 msgstr ""
 
-#: RenderApp/Controller/FormatRenderedProblem.pm:276
+#: RenderApp/Controller/FormatRenderedProblem.pm:292
 msgid "Preview My Answers"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:290
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:309
 msgid "Result"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:302
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:322
 msgid "Results for this submission"
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:187
+#: PG/macros/problemRandomize.pl:186
 msgid "Set random seed to:"
 msgstr ""
 
-#: RenderApp/Controller/FormatRenderedProblem.pm:277
-msgid "Show correct answers"
+#: RenderApp/Controller/FormatRenderedProblem.pm:293
+msgid "Show Correct Answers"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1554 PG/macros/PGbasicmacros.pl:1555
+#: PG/macros/PGbasicmacros.pl:1556 PG/macros/PGbasicmacros.pl:1557
 msgid "Solution:"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:1553
+#: PG/macros/PGbasicmacros.pl:1555
 msgid "Solution: "
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:377
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:401
 msgid "Some answers will be graded later."
 msgstr ""
 
-#: RenderApp/Controller/FormatRenderedProblem.pm:278
+#: RenderApp/Controller/FormatRenderedProblem.pm:294
 msgid "Submit Answers"
 msgstr ""
 
@@ -140,19 +140,19 @@ msgstr ""
 msgid "Submit your answers again to go on to the next part."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:379
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:404
 msgid "The answer above is NOT correct."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:375
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:399
 msgid "The answer above is correct."
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:407
+#: PG/macros/problemRandomize.pl:406
 msgid "This is a new (re-randomized) version of the problem."
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:3084
+#: PG/macros/PGbasicmacros.pl:3038
 msgid "This problem contains a video which must be viewed online."
 msgstr ""
 
@@ -160,15 +160,15 @@ msgstr ""
 msgid "This problem has more than one part."
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:248
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:270
 msgid "Ungraded"
 msgstr ""
 
-#: PG/macros/PGanswermacros.pl:1693
+#: PG/macros/PGanswermacros.pl:1692
 msgid "You can earn partial credit on this problem."
 msgstr ""
 
-#: PG/macros/problemRandomize.pl:383
+#: PG/macros/problemRandomize.pl:382
 msgid "You can get a new version of this problem after the due date."
 msgstr ""
 
@@ -176,7 +176,7 @@ msgstr ""
 msgid "You may not change your answers when going on to the next part!"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:3079
+#: PG/macros/PGbasicmacros.pl:3033
 msgid "Your browser does not support the video tag."
 msgstr ""
 
@@ -185,54 +185,54 @@ msgid "Your score for this attempt is for this part only;"
 msgstr ""
 
 #. (wwRound(0, $problemResult->{score} * 100)
-#: RenderApp/Controller/FormatRenderedProblem.pm:215
+#: RenderApp/Controller/FormatRenderedProblem.pm:227
 msgid "Your score on this attempt is %1"
 msgstr ""
 
-#: RenderApp/Controller/FormatRenderedProblem.pm:217
+#: RenderApp/Controller/FormatRenderedProblem.pm:229
 msgid "Your score was not recorded."
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:645 PG/macros/PGbasicmacros.pl:656
+#: PG/macros/PGbasicmacros.pl:647 PG/macros/PGbasicmacros.pl:658
 msgid "answer"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:669
+#: PG/macros/PGbasicmacros.pl:671
 msgid "column"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:244
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:267
 msgid "correct"
 msgstr ""
 
 #. ('j','k','_0')
 #. ('j','k')
 #: PG/lib/Parser/List/Vector.pm:35 PG/lib/Value/Vector.pm:278
-#: PG/macros/contextLimitedVector.pl:94
+#: PG/macros/contextLimitedVector.pl:93
 msgid "i"
 msgstr ""
 
-#: PG/macros/contextPiecewiseFunction.pl:774
+#: PG/macros/contextPiecewiseFunction.pl:773
 msgid "if"
 msgstr ""
 
-#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:253
+#: WeBWorK/lib/WeBWorK/Utils/AttemptsTable.pm:274
 msgid "incorrect"
 msgstr ""
 
-#: PG/macros/contextPiecewiseFunction.pl:777
+#: PG/macros/contextPiecewiseFunction.pl:776
 msgid "otherwise"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:662
+#: PG/macros/PGbasicmacros.pl:664
 msgid "part"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:651
+#: PG/macros/PGbasicmacros.pl:653
 msgid "problem"
 msgstr ""
 
-#: PG/macros/PGbasicmacros.pl:668
+#: PG/macros/PGbasicmacros.pl:670
 msgid "row"
 msgstr ""
 
