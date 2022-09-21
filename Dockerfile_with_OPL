@@ -43,6 +43,9 @@ RUN apt-get update \
     libmath-random-secure-perl \
     libdata-structure-util-perl \
     liblocale-maketext-lexicon-perl \
+    libyaml-libyaml-perl \
+    && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y --no-install-recommends --no-install-suggests nodejs \
     && apt-get clean \
     && rm -fr /var/lib/apt/lists/* /tmp/*
 
@@ -62,9 +65,7 @@ RUN rm -r webwork-open-problem-library-master/
 
 COPY . .
 
-RUN cp render_app.conf.dist render_app.conf
-
-RUN cd lib/WeBWorK/htdocs && npm install && cd ../../..
+RUN cd lib/PG/htdocs && npm install && cd ../../.. && npm install
 
 EXPOSE 3000
 

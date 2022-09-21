@@ -1,7 +1,7 @@
 # WeBWorK Standalone Problem Renderer & Editor
 
-![Commit Activity](https://img.shields.io/github/commit-activity/m/drdrew42/renderer?style=plastic)
-![License](https://img.shields.io/github/license/drdrew42/renderer?style=plastic)
+![Commit Activity](https://img.shields.io/github/commit-activity/m/openwebwork/renderer?style=plastic)
+![License](https://img.shields.io/github/license/openwebwork/renderer?style=plastic)
 
 
 This is a PG Renderer derived from the WeBWorK2 codebase
@@ -13,42 +13,62 @@ This is a PG Renderer derived from the WeBWorK2 codebase
 mkdir volumes
 mkdir container
 git clone https://github.com/openwebwork/webwork-open-problem-library volumes/webwork-open-problem-library
-git clone --recursive https://github.com/drdrew42/renderer container/
-docker build --tag renderer:1.0 ./container
+git clone --recursive https://github.com/openwebwork/renderer container/
 
-docker run -d \
-  --rm \
-  --name standalone-renderer \
-  --publish 3000:3000 \
-  --mount type=bind,source="$(pwd)"/volumes/webwork-open-problem-library/,target=/usr/app/webwork-open-problem-library \
-  --env MOJO_MODE=development \
-  renderer:1.0
-```
+cd container
+docker build --no-cache --tag renderer-base:latest -f DockerfileStage1 .
 
-If you have non-OPL content, it can be mounted as a volume at `/usr/app/private` by adding the following line to the `docker run` command:
+# If you have a local version of docker-compose.yml you should update it
+# as necessary before running the next line. If not, copy the
+# docker-compose.yml.dist to docker-compose.yml and edit as necessary.
 
-```
-  --mount type=bind,source=/pathToYourLocalContentRoot,target=/usr/app/private \
-```
+docker-compose build --no-cache
 
-A default configuration file is included in the container, but it can be overridden by mounting a replacement at the application root. This is necessary if, for example, you want to run the container in `production` mode.
+# You set the MOJO_MODE and mount locations in docker-compose.yml
+# unlike in the past where it was done in the docker run command
+
+docker-compose up -d
 
 ```
-  --mount type=bind,source=/pathToYour/render_app.conf,target=/usr/app/render_app.conf \
+
+To stop the container run:
 ```
+docker-compose down
+```
+
+If you need to rebuild the container, but do not need to change the
+packages/installs in the stage 1 build, it suffices to:
+```
+cd container
+git submodule update
+docker-compose build --no-cache
+```
+
+Note: the use of `git submodule update` above is needed to make sure that the PG tree
+which will be included in the Docker image is up to date.
+
+If you have non-OPL content, it can be mounted as a volume at `/usr/app/private` by
+setting the relevant mount moint in `docker-compose.yml` so that it gets mounted under
+`/usr/app/private`.
+
+A default `render_app.conf` configuration file is included in the container,
+but it can be overridden by mounting a replacement at the application root
+using `docker-compose.yml`. This is necessary if, for example, you want to run
+the container in `production` mode.
 
 ## LOCAL INSTALL ###
 
 If using a local install instead of docker:
 
-* Clone the renderer and its submodules: `git clone --recursive https://github.com/drdrew42/renderer`
+* Clone the renderer and its submodules: `git clone --recursive https://github.com/openwebwork/renderer`
 * Enter the project directory: `cd renderer`
 * Install perl dependencies listed in Dockerfile (CPANMinus recommended)
 * clone webwork-open-problem-library into the provided stub ./webwork-open-problem-library
   - `git clone https://github.com/openwebwork/webwork-open-problem-library ./webwork-open-problem-library`
 * copy `render_app.conf.dist` to `render_app.conf` and make any desired modifications
 * install other dependencies
-  - `cd lib/WeBWorK/htdocs`
+  - `npm install`
+  - `cd lib/PG/htdocs`
   - `npm install`
 * start the app with `morbo ./script/render_app` or `morbo -l http://localhost:3000 ./script/render_app` if changing root url
 * access on `localhost:3000` by default or otherwise specified root url

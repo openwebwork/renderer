@@ -1,5 +1,6 @@
 *.DS_Store
 render_app.conf
+docker-compose.yml
 lib/WeBWorK/htdocs/tmp/renderer/gif/*
 lib/WeBWorK/htdocs/tmp/renderer/images/*
 lib/WeBWorK/htdocs/DATA/*.json
