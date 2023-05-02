@@ -100,6 +100,7 @@ Can be interfaced through `/render-api`
 | showSummary | number (boolean) | ? | false? | Determines whether or not to show the summary result of processing the form-data associated with `answersSubmitted` above ||
 | showComments | number (boolean) | 0 | false | Renders author comment field at the end of the problem ||
 | includeTags | number (boolean) | 0 | false | Includes problem tags in the returned JSON | Only relevant when requesting `format: 'json'` |
+| thirdPartyPGAssetsUseCDN | number (boolean) | 0 | false | Serve third party PG assets from a CDN | |
 
 ## Output Format
 

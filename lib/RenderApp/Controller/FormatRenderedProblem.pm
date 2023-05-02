@@ -248,7 +248,8 @@ sub formatRenderedProblem {
 				push @{ $rh_result->{js} }, $_->{file};
 				$extra_js_files .= CGI::script({ src => $_->{file}, %attributes }, '');
 			} else {
-				my $url = getAssetURL($self->{inputs_ref}{language} // 'en', $_->{file});
+				my $url = getAssetURL($self->{inputs_ref}{language} // 'en',
+					$_->{file}, $self->{inputs_ref}{thirdPartyPGAssetsUseCDN});
 				push @{ $rh_result->{js} }, $SITE_URL.$url;
 				$extra_js_files .= CGI::script({ src => $url, %attributes }, '');
 			}
@@ -271,7 +272,8 @@ sub formatRenderedProblem {
 			push @{ $rh_result->{css} }, $_->{file};
 			$extra_css_files .= CGI::Link({ rel => 'stylesheet', href => $_->{file} });
 		} else {
-			my $url = getAssetURL($self->{inputs_ref}{language} // 'en', $_->{file});
+			my $url = getAssetURL($self->{inputs_ref}{language} // 'en',
+				$_->{file},, $self->{inputs_ref}{thirdPartyPGAssetsUseCDN});
 			push @{ $rh_result->{css} }, $SITE_URL.$url;
 			$extra_css_files .= CGI::Link({ href => $url, rel => 'stylesheet' });
 		}
