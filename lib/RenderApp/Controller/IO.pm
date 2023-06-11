@@ -118,6 +118,91 @@ sub upload {
     return $c->render( text => 'File successfully uploaded', status => 200 );
 }
 
+sub remove {
+  my $c = shift;
+  my $required = [];
+  push @$required,
+    {
+      field     => 'removeFilePath',
+      checkType => 'like',
+      check     => $regex->{privateOnly},
+    };
+  my $validatedInput = $c->validateRequest( { required => $required } );
+  return unless $validatedInput;
+
+  my $file_path = $validatedInput->{removeFilePath};
+  my $file = Mojo::File->new($file_path);
+
+  return $c->render( text => 'Path does not exist', status => 404 )
+    unless (-e $file);
+
+  if (-d $file) {
+    return $c->render( text => 'Directory is not empty', status => 400 )
+      unless ($file->list({ dir => 1 })->size == 0);
+
+    $file->remove_tree;
+  } else {
+    $file->remove;
+  }
+
+  return $c->render( text => 'Path deleted' );
+}
+
+sub clone {
+  my $c = shift;
+  my $required = [];
+  push @$required,
+    {
+      field     => 'sourceFilePath',
+      checkType => 'like',
+      check     => $regex->{privateOnly},
+    };
+  push @$required,
+    {
+      field     => 'targetFilePath',
+      checkType => 'like',
+      check     => $regex->{privateOnly},
+    };
+  my $validatedInput = $c->validateRequest( { required => $required } );
+  return unless $validatedInput;
+
+  my $source_path = $validatedInput->{sourceFilePath};
+  my $source_file = Mojo::File->new($source_path);
+  my $target_path = $validatedInput->{targetFilePath};
+  my $target_file = Mojo::File->new($target_path);
+  
+  return $c->render( text => 'source does not exist', status => 404 )
+    unless (-e $source_file);
+
+  return $c->render( text => 'target already exists', status => 400 )
+    if (-e $target_file);
+
+  # allow cloning of directories - problems with static assets
+  # no recursing through directories!
+  if (-d $source_file) {
+    return $c->render( text => 'source does not contain clone-able files', status => 400)
+      if ($source_file->list->size == 0);
+
+    return $c->render( text => 'target must also be a directory', status => 400)
+      unless ($target_path =~ m!.*/$!);
+    
+    $target_file->make_path;
+    for ($source_file->list->each) {
+      $_->copy_to($target_path . $_->basename);
+    }
+  } else {
+    return $c->render( text => 'you may not create new directories with this method', status => 400)
+      unless (-e $target_file->dirname);
+
+    return($c->render( text => 'file extensions do not match'))
+      unless ($source_file->extname eq $target_file->extname);
+
+    $source_file->copy_to($target_file);
+  }
+
+  return $c->render( text => 'clone successful' );
+}
+
 async sub catalog {
     my $c = shift;
     my $required = [];
@@ -169,13 +254,12 @@ sub depthSearch_p {
             my $wanted = sub {
                 # measure depth relative to root_path
                 ( my $rel = $File::Find::name ) =~ s!^\Q$root_path\E/?!!;
+                return unless $rel;
                 my $path = $File::Find::name;
                 $File::Find::prune = 1
                   if File::Spec::Functions::splitdir($rel) >= $depth;
                 $path = $path . '/' if -d $File::Find::name;
-                # only report .pg files and directories
-                $all{$rel} = $path
-                  if ( $rel =~ /\S/ && ( $path =~ m!.+/$! || $path =~ m!.+\.pg$! ) );
+                $all{$rel} = $path;
             };
             File::Find::find { wanted => $wanted, no_chdir => 1 }, $root_path;
             return \%all, 200;
