@@ -2,7 +2,7 @@ window.addEventListener('message', event => {
 	let message;
 	try {
 	  message = JSON.parse(event.data);
-	} 
+	}
 	catch (e) {
 	  return;
 	}
@@ -50,7 +50,15 @@ problemiframe.addEventListener("load", () => {
 	activeButton();
 });
 
-savebutton.addEventListener("click", (event) => {
+
+const editorContainer = document.querySelector('.code-mirror-editor');
+const cm = new PGCodeMirrorEditor.View(editorContainer, {
+	source: '# Load a problem, then click on "render contents."',
+	language: 'pg',
+	theme: 'Cobalt'
+});
+
+savebutton.addEventListener("click", (_event) => {
 	const writeurl = "render-api/can";
 
 	let formData = new FormData();
@@ -58,7 +66,7 @@ savebutton.addEventListener("click", (event) => {
 	encoder = new TextEncoder();
 	formData.set(
 		"problemSource",
-		Base64.fromUint8Array(encoder.encode(cm.getValue()))
+		Base64.fromUint8Array(encoder.encode(cm.source))
 	);
 
 	formData.set(
@@ -117,12 +125,12 @@ loadbutton.addEventListener("click", (event) => {
 			}
 		})
 		.then(function (data) {
-			cm.setValue(data);
+			cm.source = data;
 			document.getElementById("currentEditPath").innerText =
 				document.getElementById("sourceFilePath").value;
 		})
 		.catch(function (error) {
-			cm.setValue(error.message);
+			cm.source = error.message;
 			console.log(error.message);
 		});
 });
@@ -154,7 +162,7 @@ renderbutton.addEventListener("click", (event) => {
 	encoder = new TextEncoder();
 	formData.set(
 		"problemSource",
-		Base64.fromUint8Array(encoder.encode(cm.getValue()))
+		Base64.fromUint8Array(encoder.encode(cm.source))
 	);
 
 	[...document.querySelectorAll(".checkbox-input:checked")]
@@ -244,19 +252,10 @@ function insertListener() {
 		formData.set("outputFormat", outputFormat);
 		formData.set(clickedButton.name, clickedButton.value);
 
-		//  // Version tracking steps to replace window.btoa with code supporting Unicode text
-		//  encoder = new TextEncoder();
-		//  let text16 = cm.getValue();
-		//  let text8array = encoder.encode(text16);
-		//  console.log( text8array );
-		//  let textbase64 = Base64.fromUint8Array( text8array );
-		//  console.log( textbase64 );
-		//  formData.set("problemSource", textbase64 );
-
 		encoder = new TextEncoder();
 		formData.set(
 			"problemSource",
-			Base64.fromUint8Array(encoder.encode(cm.getValue()))
+			Base64.fromUint8Array(encoder.encode(cm.source))
 		);
 
 		[...document.querySelectorAll(".checkbox-input:checked")]
