@@ -51,6 +51,7 @@ directories:
     - $pg_root/macros/parsers
     - $pg_root/macros/ui
     - $pg_root/macros/deprecated
+    - $render_root/private/macros
 
 URLs:
   # The public URL of the html directory above.
@@ -84,9 +85,6 @@ equationCacheDB: ''
 
 externalPrograms:
   curl: /usr/bin/curl
-  cp: /bin/cp
-  mv: /bin/mv
-  rm: /bin/rm
   tar: /bin/tar
   latex: /usr/bin/latex --no-shell-escape
   pdflatex: /usr/bin/pdflatex --no-shell-escape
@@ -113,7 +111,7 @@ specialPGEnvironmentVars:
 
   # Binary that the PGtikz.pl and PGlateximage.pl macros will use to create svg images.
   # This should be either 'pdf2svg' or 'dvisvgm'.
-  latexImageSVGMethod: pdf2svg
+  latexImageSVGMethod: dvisvgm
 
   # When ImageMagick is used for image conversions, this sets the default options.
   # See https://imagemagick.org/script/convert.php for a full list of options.
@@ -146,7 +144,7 @@ specialPGEnvironmentVars:
   CAPA_Tools: $Contrib_dir/CAPA/macros/CAPA_Tools/
   CAPA_MCTools: $Contrib_dir/Contrib/CAPA/macros/CAPA_MCTools/
   CAPA_GraphicsDirectory: $Contrib_dir/Contrib/CAPA/CAPA_Graphics/
-  CAPA_Graphics_URL: $pg_root_url/pg_files/CAPA_Graphics/
+  CAPA_Graphics_URL: $pg_root_url/CAPA_Graphics/
 
 # Answer evaluatior defaults
 ansEvalDefaults:
@@ -171,7 +169,7 @@ options:
   # The default grader to use, if a problem doesn't specify.
   grader: avg_problem_grader
 
-  # Note that the first of useMathQuill, useMathView, and useWirisEditor that is set (in that order) to 1 will be used.
+  # Note that the first of useMathQuill and useMathView that is set (in that order) to 1 will be used.
 
   # Set to 1 use MathQuill in answer boxes.
   useMathQuill: 1
@@ -181,9 +179,6 @@ options:
 
   # This is the operations file to use for mathview, each contains a different locale.
   mathViewLocale: mv_locale_us.js
-
-  # Set to 1 to show the WirisEditor preview system.
-  useWirisEditor: 0
 
   # Catch translation warnings internally.
   catchWarnings: 1
@@ -203,9 +198,10 @@ displayModeOptions:
       passwd: ''
 
 # PG modules to load
-# The first item of each list is the module to load. The remaining items are additional packages to import.
-# That is: If you wish to include a module MyModule.pm which depends on additional modules Dependency1.pm and
-# Dependency2.pm, these should appear as [Mymodule, Dependency1, Dependency2]
+# The first item of each list is the module file to load. The remaining items are additional packages to import that are
+# also contained in that file.
+# That is, if you wish to include a file MyModule.pm which containes the package MyModule and the additional packages
+# Dependency1 and Dependency2, then these should appear as [Mymodule, Dependency1, Dependency2].
 modules:
   - [Encode]
   - ['Encode::Encoding']
@@ -214,7 +210,8 @@ modules:
   - [DynaLoader]
   - [Exporter]
   - [GD]
-  - [AlgParser, AlgParserWithImplicitExpand, Expr, ExprWithImplicitExpand, utf8]
+  - [utf8]
+  - [AlgParser, AlgParserWithImplicitExpand, Expr, ExprWithImplicitExpand]
   - [AnswerHash, AnswerEvaluator]
   - [LaTeXImage]
   - [WWPlot] # required by Circle (and others)
@@ -237,15 +234,25 @@ modules:
   - [Select]
   - [Units]
   - [VectorField]
-  - [Parser, Value]
+  - [Parser]
+  - [Value]
   - ['Parser::Legacy']
   - [Statistics]
   - [Chromatic] # for Northern Arizona graph problems
   - [Applet]
-  - [PGcore, PGalias, PGresource, PGloadfiles, PGanswergroup, PGresponsegroup, 'Tie::IxHash']
+  - [PGcore]
+  - [PGalias]
+  - [PGresource]
+  - [PGloadfiles]
+  - [PGanswergroup]
+  - [PGresponsegroup]
+  - ['Tie::IxHash']
   - ['Locale::Maketext']
+  - ['WeBWorK::PG::Localize']
   - [JSON]
-  - [Rserve, 'Class::Tiny', 'IO::Handle']
+  - ['Class::Tiny']
+  - ['IO::Handle']
+  - ['Rserve']
   - [DragNDrop]
   - ['Types::Serialiser']
-  - ['WeBWorK::Localize']
+  - [strict]

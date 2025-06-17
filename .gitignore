@@ -1,5 +1,6 @@
 *.DS_Store
 render_app.conf
+lib/.pls-tmp-*
 lib/WeBWorK/htdocs/tmp/renderer/gif/*
 lib/WeBWorK/htdocs/tmp/renderer/images/*
 lib/WeBWorK/htdocs/DATA/*.json
@@ -8,10 +9,15 @@ webwork-open-problem-library/
 private/
 tmp/*
 !tmp/.gitkeep
-logs/*.log
+logs/*
+
 node_modules
-node_modules/*
+public/**/*.min.js
+public/**/*.min.css
+public/static-assets.json
+
 *.o
 *.pm.tdy
 *.bs
+*.pid
 .idea/
