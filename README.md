@@ -51,12 +51,12 @@ If using a local install instead of docker:
 * copy `render_app.conf.dist` to `render_app.conf` and make any desired modifications
 * copy `conf/pg_config.yml` to `lib/PG/pg_config.yml` and make any desired modifications
 * install third party JavaScript dependencies
-  * `cd private/`
-  * `npm install`
+  * `cd public/`
+  * `npm ci`
   * `cd ..`
 * install PG JavaScript dependencies
   * `cd lib/PG/htdocs`
-  * `npm install`
+  * `npm ci`
 * start the app with `morbo ./script/render_app` or `morbo -l http://localhost:3000 ./script/render_app` if changing
   root url
 * access on `localhost:3000` by default or otherwise specified root url
