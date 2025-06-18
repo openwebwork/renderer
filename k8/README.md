@@ -1,4 +1,5 @@
 #Deploy Renderer to Kubernetes
+
 1. Install `kubectl`, the [official Kubernetes client](https://kubernetes.io/docs/tasks/tools/install-kubectl/). Use the most recent version of kubectl to ensure you are within one minor version of your cluster's Kubernetes version.
 2. Install `doctl`, the official [DigitalOcean command-line tool](https://github.com/digitalocean/doctl), or other cloud platform-specific command-line tool.
 3. Install [helm](https://helm.sh/docs/intro/install/), the kubernetes package manager.

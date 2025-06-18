@@ -7,7 +7,7 @@ use Mojo::File;
 use Mojo::IOLoop;
 use Mojo::JSON qw( encode_json );
 use Mojo::Base -async_await;
-use Time::HiRes qw( time );
+use Time::HiRes  qw( time );
 use MIME::Base64 qw( decode_base64 );
 use WeBWorK::RenderProblem;
 
@@ -222,7 +222,7 @@ sub render {
 }
 
 sub success {
-	my $self   = shift;
+	my $self = shift;
 	$self->{log}->error($self->{exception}) if ($self->{log} && $self->{exception});
 	my $report = ($self->{_error} =~ /\S/) ? $self->{_error} : 'NO ERRORS';
 	return 1 unless $self->{_error} =~ /\S/;

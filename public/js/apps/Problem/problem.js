@@ -1,49 +1,56 @@
 (() => {
 	const frame = window.frameElement.id || window.frameElement.dataset.id || 'no-id';
 	// Activate the popovers in the results table.
-	document.querySelectorAll('.attemptResults .answer-preview[data-bs-toggle="popover"]')
-		.forEach((preview) => {
-			if (preview.dataset.bsContent)
-				new bootstrap.Popover(preview);
-		});
-	
+	document.querySelectorAll('.attemptResults .answer-preview[data-bs-toggle="popover"]').forEach((preview) => {
+		if (preview.dataset.bsContent) new bootstrap.Popover(preview);
+	});
+
 	// if there is a JWTanswerURLstatus element, report it to parent
 	const status = document.getElementById('JWTanswerURLstatus')?.value;
 	if (status) {
-		console.log("problem status updated:", JSON.parse(value));
+		console.log('problem status updated:', JSON.parse(value));
 		window.parent.postMessage(value, '*');
 	}
-	
+
 	// fetch the problem-result-score and postMessage to parent
 	const score = document.getElementById('problem-result-score')?.value;
 	if (score) {
-		window.parent.postMessage(JSON.stringify({
-			type: 'webwork.interaction.attempt',
-			status: score,
-			frame: frame,
-		}), '*');
+		window.parent.postMessage(
+			JSON.stringify({
+				type: 'webwork.interaction.attempt',
+				status: score,
+				frame: frame
+			}),
+			'*'
+		);
 	}
 
 	// set up listeners on knowl hints and solutions
 	document.querySelectorAll('.knowl[data-type="hint"]').forEach((hint) => {
 		hint.addEventListener('click', (event) => {
-			window.parent.postMessage(JSON.stringify({
-				type: 'webwork.interaction.hint',
-				status: hint.classList[1],
-				id: hint.dataset.bsTarget,
-				frame: frame,
-			}), '*');
+			window.parent.postMessage(
+				JSON.stringify({
+					type: 'webwork.interaction.hint',
+					status: hint.classList[1],
+					id: hint.dataset.bsTarget,
+					frame: frame
+				}),
+				'*'
+			);
 		});
 	});
 
 	document.querySelectorAll('.knowl[data-type="solution"]').forEach((solution) => {
 		solution.addEventListener('click', (event) => {
-			window.parent.postMessage(JSON.stringify({
-				type: 'webwork.interaction.solution',
-				status: solution.classList[1],
-				id: solution.dataset.bsTarget,
-				frame: frame,
-			}), '*');
+			window.parent.postMessage(
+				JSON.stringify({
+					type: 'webwork.interaction.solution',
+					status: solution.classList[1],
+					id: solution.dataset.bsTarget,
+					frame: frame
+				}),
+				'*'
+			);
 		});
 	});
 
@@ -52,13 +59,13 @@
 	const form = document.getElementById('problemMainForm');
 	let messageQueue = [];
 	let messageTimer = null;
-	
+
 	function processMessageQueue() {
 		// Process the original messages in the queue
 		for (let message = messageQueue.pop(); message; message = messageQueue.pop()) {
 			window.parent.postMessage(JSON.stringify(message), '*');
 		}
-		
+
 		// Clear the message queue and timer
 		messageQueue = [];
 		clearTimeout(messageTimer);
@@ -75,47 +82,50 @@
 		if (messageQueue[3].id !== id) return;
 
 		// toolbar interaction is focus/blur with same id, ends with answer id
-		if (!messageQueue[1].id.endsWith(id) 
-			|| !messageQueue[2].id.endsWith(id)
-			|| messageQueue[1].id !== messageQueue[2].id) return;
-		
+		if (
+			!messageQueue[1].id.endsWith(id) ||
+			!messageQueue[2].id.endsWith(id) ||
+			messageQueue[1].id !== messageQueue[2].id
+		)
+			return;
+
 		// if we get here, we have a toolbar interaction
 		const button = messageQueue[1].id.replace(`-${id}`, '');
 		messageQueue.splice(0, 4, {
 			type: 'webwork.interaction.toolbar',
-			id: button,
+			id: button
 		});
 	}
-	
+
 	function scheduleMessage(message) {
 		messageQueue.unshift(message);
 
 		if (messageQueue.length >= 4) {
 			checkForButtonClick();
 		}
-		
+
 		if (messageTimer) clearTimeout(messageTimer);
 		messageTimer = setTimeout(processMessageQueue, 350);
 	}
-	
+
 	form.addEventListener('focusin', (event) => {
-		const id = event.composedPath().reduce((s, el) => s ? s : el.id, '');
+		const id = event.composedPath().reduce((s, el) => (s ? s : el.id), '');
 		if (id !== 'problem_body') {
 			scheduleMessage({
 				type: 'webwork.interaction.focus',
 				id: id.replace('mq-answer-', ''),
-				frame: frame,
+				frame: frame
 			});
 		}
 	});
-	
+
 	form.addEventListener('focusout', (event) => {
-		const id = event.composedPath().reduce((s, el) => s ? s : el.id, '');
+		const id = event.composedPath().reduce((s, el) => (s ? s : el.id), '');
 		if (id !== 'problem_body') {
 			scheduleMessage({
 				type: 'webwork.interaction.blur',
 				id: id.replace('mq-answer-', ''),
-				frame: frame,
+				frame: frame
 			});
 		}
 	});
@@ -138,7 +148,7 @@
 			const url = creditForm.action;
 			const options = {
 				method: 'POST',
-				body: formData,
+				body: formData
 			};
 			fetch(url, options)
 				.then((response) => {
