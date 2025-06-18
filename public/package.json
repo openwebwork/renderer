@@ -4,7 +4,9 @@
     "license": "GPL-2.0+",
     "scripts": {
         "generate-assets": "node generate-assets",
-        "prepare": "npm run generate-assets"
+        "prepare": "npm run generate-assets",
+        "prettier-format": "prettier --ignore-path=../.gitignore --write \"**/*.{js,css,scss,html}\" \"../**/*.yml\"",
+        "prettier-check": "prettier --ignore-path=../.gitignore --check \"**/*.{js,css,scss,html}\" \"../**/*.yml\""
     },
     "repository": {
         "type": "git",
@@ -24,6 +26,7 @@
         "chokidar": "^3.5.3",
         "cssnano": "^6.0.0",
         "postcss": "^8.4.21",
+        "prettier": "^3.5.3",
         "rtlcss": "^4.0.0",
         "sass": "^1.57.1",
         "terser": "^5.16.1",
