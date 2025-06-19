@@ -4,7 +4,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-use JSON;
+use Mojo::JSON qw(decode_json);
 
 our @EXPORT_OK = qw(
 	wwRound
@@ -35,7 +35,7 @@ sub readJSON {
 	my $data = <$fh>;
 	close $fh;
 
-	return JSON->new->decode($data);
+	return decode_json($data);
 }
 
 sub getThirdPartyAssetURL {
@@ -49,7 +49,7 @@ sub getThirdPartyAssetURL {
 					. substr($dependencies->{$_}, 1) . '/'
 					. ($1 =~ s/(?:\.min)?\.(js|css)$/.min.$1/gr);
 			} else {
-				return Mojo::URL->new("${baseURL}$file")->query(version => $dependencies->{$_} =~ s/#/@/gr);
+				return Mojo::URL->new("${baseURL}$file")->query(version => $dependencies->{$_} =~ s/#/@/gr)->to_string;
 			}
 		}
 	}
@@ -99,15 +99,10 @@ sub getAssetURL {
 	# If so, then either serve it from a CDN if requested, or serve it directly with the library version
 	# appended as a URL parameter.
 	if ($file =~ /^node_modules/) {
-		my $wwFile = getThirdPartyAssetURL(
-			$file, $thirdPartyWWDependencies,
-			'',
-			0
-		);
+		my $wwFile = getThirdPartyAssetURL($file, $thirdPartyWWDependencies, '', 0);
 		return $wwFile if $wwFile;
 
-		my $pgFile =
-			getThirdPartyAssetURL($file, $thirdPartyPGDependencies, 'pg_files/', 1);
+		my $pgFile = getThirdPartyAssetURL($file, $thirdPartyPGDependencies, 'pg_files/', 1);
 		return $pgFile if $pgFile;
 	}
 
@@ -117,7 +112,7 @@ sub getAssetURL {
 		($language =~ /^(he|ar)/ && $file !~ /node_modules/ && $file =~ /\.css$/)
 		? $file =~ s/\.css$/.rtl.css/r
 		: undef;
-	
+
 	# First check to see if this is a file in the webwork htdocs location with a rtl variant.
 	return "$staticWWAssets->{$rtlfile}"
 		if defined $rtlfile && defined $staticWWAssets->{$rtlfile};

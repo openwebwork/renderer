@@ -8,8 +8,8 @@ use Time::HiRes qw/time/;
 use Proc::ProcessTable;
 use Date::Format;
 
-use JSON::XS;
-use Crypt::JWT qw( encode_jwt );
+use Mojo::JSON  qw( encode_json );
+use Crypt::JWT  qw( encode_jwt );
 use Digest::MD5 qw( md5_hex );
 
 use lib "$ENV{PG_ROOT}/lib";
@@ -42,7 +42,7 @@ die "You must first create an output file at $path_to_log_file with permissions 
 sub UNIVERSAL::TO_JSON {
 	my ($self) = shift;
 
-	use Storable qw(dclone);
+	use Storable              qw(dclone);
 	use Data::Structure::Util qw(unbless);
 
 	my $clone = unbless(dclone($self));
@@ -97,8 +97,7 @@ sub process_pg_file {
 	$return_object->{tags} = WeBWorK::Utils::Tags->new($inputs_ref->{sourceFilePath}, $problem->source)
 		if ($inputs_ref->{includeTags});
 
-	my $coder = JSON::XS->new->ascii->pretty->allow_unknown->convert_blessed;
-	my $json  = $coder->encode($return_object);
+	my $json = encode_json($return_object);
 	return $json;
 }
 

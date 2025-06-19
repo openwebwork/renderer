@@ -10,8 +10,7 @@ package WeBWorK::FormatRenderedProblem;
 use strict;
 use warnings;
 
-use JSON;
-# use Digest::SHA qw(sha1_base64);
+use Mojo::JSON qw(encode_json);
 use Mojo::Util qw(xml_escape);
 use Mojo::DOM;
 use Mojo::URL;
@@ -88,9 +87,7 @@ sub formatRenderedProblem {
 	);
 
 	# Get the requested format. (outputFormat or outputformat)
-	# override to static mode if showCorrectAnswers has been set
-	my $formatName = $inputs_ref->{showCorrectAnswers}
-		&& !$inputs_ref->{isInstructor} ? 'static' : ($inputs_ref->{outputFormat} || 'default');
+	my $formatName = $inputs_ref->{outputFormat} || 'default';
 
 	# Add JS files requested by problems via ADD_JS_FILE() in the PG file.
 	my @extra_js_files;
@@ -203,7 +200,7 @@ sub formatRenderedProblem {
 		$output->{third_party_js}  = \@third_party_js;
 
 		# Convert to JSON and render.
-		return $c->render(data => JSON->new->utf8(1)->encode($output));
+		return $c->render(data => encode_json($output));
 	}
 
 	# Setup and render the appropriate template in the templates/RPCRenderFormats folder depending on the outputformat.
