@@ -12,9 +12,9 @@ spec:
       name: letsencrypt-prod-private-key
     # Add a single challenge solver, HTTP01 using nginx
     solvers:
-    - http01:
-        ingress:
-          class: nginx
+      - http01:
+          ingress:
+            class: nginx
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -25,17 +25,17 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:
-  - hosts:
-    - "example.org"
-    secretName: renderer-kubernetes-tls
+    - hosts:
+        - 'example.org'
+      secretName: renderer-kubernetes-tls
   rules:
-  - host: "example.org"
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: wwrenderer
-            port:
-              number: 80
+    - host: 'example.org'
+      http:
+        paths:
+          - pathType: Prefix
+            path: '/'
+            backend:
+              service:
+                name: wwrenderer
+                port:
+                  number: 80

@@ -15,4 +15,3 @@ xgettext.pl -o WeBWorK/Localize/standalone.pot -D PG/lib -D PG/macros -D RenderA
 cd WeBWorK/Localize
 find . -name '*.po' -exec bash -c "echo \"Updating {}\"; msgmerge -qUN {} standalone.pot" \;
 ```
-

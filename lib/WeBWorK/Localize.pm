@@ -22,7 +22,7 @@ eval "
 	});
 	*tense = sub { \$_[1] . ((\$_[2] eq 'present') ? 'ing' : 'ed') };
 
-" or die "Can't process eval in WeBWorK/Localize.pm: line 35:  ". $@;
+" or die "Can't process eval in WeBWorK/Localize.pm: line 35:  " . $@;
 
 package WeBWorK::Localize;
 
@@ -32,13 +32,13 @@ package WeBWorK::Localize;
 # on perl 5.8.8
 sub getLoc {
 	my $lang = shift;
-	my $lh = WeBWorK::Localize::I18N->get_handle($lang);
-	return sub {$lh->maketext(@_)};
+	my $lh   = WeBWorK::Localize::I18N->get_handle($lang);
+	return sub { $lh->maketext(@_) };
 }
 
 sub getLangHandle {
 	my $lang = shift;
-	my $lh = WeBWorK::Localize::I18N->get_handle($lang);
+	my $lh   = WeBWorK::Localize::I18N->get_handle($lang);
 	return $lh;
 }
 
@@ -46,33 +46,31 @@ sub getLangHandle {
 #  usage: [quant,_1,<singular>,<plural>,<optional zero>]
 
 sub plural {
-    my($handle, $num, @forms) = @_;
+	my ($handle, $num, @forms) = @_;
 
-    return "" if @forms == 0;
-    return $forms[2] if @forms > 2 and $num == 0;
+	return ""        if @forms == 0;
+	return $forms[2] if @forms > 2 and $num == 0;
 
-    # Normal case:
-    return(  $handle->numerate($num, @forms) );
+	# Normal case:
+	return ($handle->numerate($num, @forms));
 }
 
 # this is like [quant] but it also has -1 case
 #  usage: [negquant,_1,<neg case>,<singular>,<plural>,<optional zero>]
 
 sub negquant {
-    my($handle, $num, @forms) = @_;
+	my ($handle, $num, @forms) = @_;
 
-    return $num if @forms == 0;
+	return $num if @forms == 0;
 
-    my $negcase = shift @forms;
-    return $negcase if $num < 0;
+	my $negcase = shift @forms;
+	return $negcase if $num < 0;
 
-    return $forms[2] if @forms > 2 and $num == 0;
-    return( $handle->numf($num) . ' ' . $handle->numerate($num, @forms) );
+	return $forms[2] if @forms > 2 and $num == 0;
+	return ($handle->numf($num) . ' ' . $handle->numerate($num, @forms));
 }
 
-%Lexicon = (
-	    '_AUTO' => 1,
-	   );
+%Lexicon = ('_AUTO' => 1,);
 
 package WeBWorK::Localize::I18N;
 use base(WeBWorK::Localize);
