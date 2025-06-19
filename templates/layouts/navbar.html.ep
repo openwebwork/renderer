@@ -11,12 +11,10 @@
   <body>
     <div class="topnav" id="myTopnav">
       <div class="dropdown" id="template-select-dropdown">
-        <button class="dropbtn" id="template-select">Template
-          <i class="fa fa-caret-down"></i>
-        </button>
+        <button class="dropbtn" id="template-select">Default <i class="fa fa-caret-down"></i></button>
         <div class="dropdown-content">
           <a href="#" class="dropdown-item" id="static">Static <i class="fa fa-check" aria-hidden="true"></i></a>
-          <a href="#" class="dropdown-item" id="default">Default <i class="fa fa-check" aria-hidden="true"></i></a>
+          <a href="#" class="dropdown-item selected" id="default">Default <i class="fa fa-check" aria-hidden="true"></i></a>
           <a href="#" class="dropdown-item" id="debug">Debug <i class="fa fa-check" aria-hidden="true"></i></a>
         </div>
       </div>

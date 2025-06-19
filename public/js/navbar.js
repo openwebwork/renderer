@@ -141,14 +141,7 @@ renderbutton.addEventListener("click", (event) => {
 	const renderurl = "render-api";
 
 	const selectedformat = document.querySelector(".dropdown-item.selected");
-	let outputFormat;
-	if (selectedformat === null) {
-		console.log(typeof selectedformat);
-		alert("No output format selected. Defaulting to 'classic' format.");
-		outputFormat = "classic";
-	} else {
-		outputFormat = selectedformat.id;
-	}
+	const outputFormat = selectedformat?.id ?? 'default';
 	let formData = new FormData();
 	formData.set("showComments", 1);
 	formData.set(
@@ -231,13 +224,7 @@ function insertListener() {
 		const selectedformat = document.querySelector(
 			".dropdown-item.selected"
 		);
-		let outputFormat;
-		if (selectedformat === null) {
-			alert("No output format selected. Defaulting to 'classic' format.");
-			outputFormat = "classic";
-		} else {
-			outputFormat = selectedformat.id;
-		}
+		const outputFormat = selectedformat?.id ?? 'default';
 		formData.set("isInstructor", 1);
 		formData.set("includeTags", 1);
 		formData.set("showComments", 1);
