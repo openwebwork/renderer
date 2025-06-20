@@ -1,4 +1,4 @@
-% use WeBWorK::Utils qw(getAssetURL wwRound);
+% use WeBWorK::Utils qw(wwRound);
 %
 <!DOCTYPE html>
 <html <%== $COURSE_LANG_AND_DIR %>>

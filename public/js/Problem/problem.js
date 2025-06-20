@@ -27,7 +27,7 @@
 
 	// set up listeners on knowl hints and solutions
 	document.querySelectorAll('.knowl[data-type="hint"]').forEach((hint) => {
-		hint.addEventListener('click', (event) => {
+		hint.addEventListener('click', () => {
 			window.parent.postMessage(
 				JSON.stringify({
 					type: 'webwork.interaction.hint',
@@ -41,7 +41,7 @@
 	});
 
 	document.querySelectorAll('.knowl[data-type="solution"]').forEach((solution) => {
-		solution.addEventListener('click', (event) => {
+		solution.addEventListener('click', () => {
 			window.parent.postMessage(
 				JSON.stringify({
 					type: 'webwork.interaction.solution',
@@ -166,7 +166,7 @@
 		// we also need to trigger the submit when the user clicks the button
 		// or when they hit enter in the input field
 		const creditButton = document.getElementById('creditModalSubmitBtn');
-		creditButton.addEventListener('click', (event) => {
+		creditButton.addEventListener('click', () => {
 			creditForm.dispatchEvent(new Event('submit'));
 		});
 		const creditInput = document.getElementById('creditModalEmail');

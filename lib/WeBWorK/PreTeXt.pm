@@ -3,11 +3,13 @@ package WeBWorK::PreTeXt;
 use strict;
 use warnings;
 
+use Mojo::File;
 use Mojo::DOM;
 use Mojo::IOLoop;
 use Data::Structure::Util qw(unbless);
 
-use lib "$ENV{PG_ROOT}/lib";
+use lib Mojo::File::curfile->dirname->dirname->child('PG', 'lib');
+
 use WeBWorK::PG;
 
 sub render_ptx {
@@ -43,4 +45,5 @@ sub render_ptx {
 		return "error: $err";
 	});
 }
+
 1;

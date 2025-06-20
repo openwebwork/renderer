@@ -1,4 +1,4 @@
-%= javascript 'node_modules/@openwebwork/pg-codemirror-editor/dist/pg-codemirror-editor.js'
+%= javascript getAssetURL('node_modules/@openwebwork/pg-codemirror-editor/dist/pg-codemirror-editor.js')
 
 <div id='edit-header' class='header'>
     <b>Editing problem:</b><br>

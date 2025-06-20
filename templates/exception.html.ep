@@ -1,5 +1,5 @@
-%= stylesheet "$ENV{baseURL}/css/typing-sim.css"
-%= stylesheet "$ENV{baseURL}/css/crt-display.css"
+%= stylesheet getAssetURL('css/typing-sim.css')
+%= stylesheet getAssetURL('css/crt-display.css')
 %= javascript begin
 window.onload = function() {
     let i = 0;
@@ -19,7 +19,8 @@ window.onload = function() {
 % end
 
 % my $message = $c->stash('message') // $c->stash('exception')->message;
-% $message =~ s!$ENV{RENDER_ROOT}/!!g;
+% my $renderRoot = $c->app->home;
+% $message =~ s!$renderRoot/!!g;
 <body class='crt'>
     <div class='typewriter'>
         <h1 id='error-block' text="<%=$message%>">></h1>

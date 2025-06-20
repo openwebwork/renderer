@@ -1,13 +1,13 @@
-%= stylesheet 'css/tags.css'
+%= stylesheet getAssetURL('css/tags.css')
 
 % my $taxo = '';
-% if ( open(TAXONOMY, "<:encoding(utf8)", $c->app->home->child('tmp/tagging-taxonomy.json')) ) {
-%     $taxo = join("", <TAXONOMY>);
-%     close TAXONOMY;
+% if (open(my $taxonomy, '<:encoding(utf8)', $c->app->home->child('tmp/tagging-taxonomy.json'))) {
+    % $taxo = join('', <$taxonomy>);
+    % close $taxonomy;
 % } else { die "Could not open Taxonomy!"; }
 
 <div class='content'>
-    %= form_for 'render-api/tags' => ( method => 'POST', id => 'problem-tags' ) => begin
+    %= form_for 'renderapitags' => ( method => 'POST', id => 'problem-tags' ) => begin
     %= hidden_field 'file' => '', id => 'tag-filename'
     <div id='tag-wrapper' class='wrapper'>
         <div class='form-row'>
@@ -79,7 +79,7 @@
         </div>
     </div>
     <div class = 'form-row'>
-        %= submit_button 'Save Tags' 
+        %= submit_button 'Save Tags'
     </div>
     %= end
 </div>
@@ -87,4 +87,4 @@
 %= javascript begin
 taxo = <%== $taxo %>;
 %= end
-%= javascript 'js/tags.js'
+%= javascript getAssetURL('js/tags.js')

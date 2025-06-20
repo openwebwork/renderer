@@ -6,32 +6,18 @@ use warnings;
 # for logs
 use Time::HiRes qw/time/;
 use Proc::ProcessTable;
-use Date::Format;
 
+use Mojo::File;
 use Mojo::JSON  qw( encode_json );
 use Crypt::JWT  qw( encode_jwt );
 use Digest::MD5 qw( md5_hex );
 
-use lib "$ENV{PG_ROOT}/lib";
+use lib Mojo::File::curfile->dirname->dirname->child('PG', 'lib');
 
 use WeBWorK::PG;
 use WeBWorK::Utils::Tags;
 
-##################################################
-# create log files :: expendable
-##################################################
-
-my $path_to_log_file = "$ENV{RENDER_ROOT}/logs/resource_usage.log";
-
-eval {    # attempt to create log file
-	local (*FH);
-	open(FH, '>>:encoding(UTF-8)', $path_to_log_file)
-		or die "Can't open file $path_to_log_file for writing";
-	close(FH);
-};
-
-die "You must first create an output file at $path_to_log_file with permissions 777 "
-	unless -w $path_to_log_file;
+my $renderRoot = Mojo::File::curfile->dirname->dirname->dirname;
 
 ##################################################
 # define universal TO_JSON for JSON::XS unbless
@@ -78,7 +64,7 @@ sub process_pg_file {
 	my $log_file_path  = $inputs_ref->{sourceFilePath} || 'source provided without path';
 	my $memory_use_end = get_current_process_memory();
 	my $memory_use     = $memory_use_end - $memory_use_start;
-	writeRenderLogEntry(
+	$problem->c->resourceUsageLog(
 		sprintf("(duration: %.3f sec) ", $pg_duration)
 			. sprintf("{memory: %6d bytes} ", $memory_use)
 			. "file: $log_file_path"
@@ -140,7 +126,7 @@ sub process_problem {
 	$error_string = '';
 
 	# can include @args as third input below
-	$return_object = standaloneRenderer(\$source, $inputs_ref);
+	$return_object = renderPG($problem->c, \$source, $inputs_ref);
 
 	# stash assets list in $return_object
 	$return_object->{pgResources}       = \@pgResources;
@@ -151,7 +137,7 @@ sub process_problem {
 		# if this is a preview, leave session unmodified, and no answerJWT
 		$return_object->{sessionJWT} = $inputs_ref->{sessionJWT};
 	} elsif ($inputs_ref->{problemJWT}) {
-		my ($sessionJWT, $answerJWT) = generateJWTs($return_object, $inputs_ref);
+		my ($sessionJWT, $answerJWT) = generateJWTs($problem->c, $return_object, $inputs_ref);
 		$return_object->{sessionJWT} = $sessionJWT;
 		$return_object->{answerJWT}  = $answerJWT;
 	}
@@ -182,7 +168,8 @@ sub process_problem {
 # standalonePGproblemRenderer
 ###########################################
 
-sub standaloneRenderer {
+sub renderPG {
+	my $c           = shift;
 	my $problemFile = shift // '';
 	my $inputs_ref  = shift // {};
 	my %args        = @_;
@@ -221,9 +208,9 @@ sub standaloneRenderer {
 		psvn                    => $inputs_ref->{psvn},
 		problemUUID             => $inputs_ref->{problemUUID},
 		language                => $inputs_ref->{language} // 'en',
-		templateDirectory       => "$ENV{RENDER_ROOT}/",
-		htmlURL                 => 'pg_files/',
-		tempURL                 => 'pg_files/tmp/',
+		templateDirectory       => "$renderRoot/",
+		htmlURL                 => $c->url_for('pgFile',     static => '')->to_string,
+		tempURL                 => $c->url_for('pgTempFile', static => '')->to_string,
 		debuggingOptions        => {
 			show_resource_info          => $inputs_ref->{show_resource_info},
 			view_problem_debugging_info => $inputs_ref->{view_problem_debugging_info}
@@ -287,10 +274,12 @@ sub get_current_process_memory {
 # expects a pg/result_object and a ref to submitted formdata
 # generates a sessionJWT and an answerJWT
 sub generateJWTs {
-	my $pg          = shift;
-	my $inputs_ref  = shift;
+	my $c          = shift;
+	my $pg         = shift;
+	my $inputs_ref = shift;
+
 	my $sessionHash = {
-		iss              => $ENV{SITE_HOST},
+		iss              => $c->config->{SITE_HOST},
 		answersSubmitted => 1,
 		sessionID        => $inputs_ref->{sessionID},
 		problemUUID      => $inputs_ref->{problemUUID},
@@ -301,13 +290,6 @@ sub generateJWTs {
 		answers => unbless($pg->{answers}),
 	};
 
-   # proposed restructuring of the answerJWT -- prepare with LibreTexts
-   # my %studentKeys = qw(student_value value student_formula formula student_ans answer original_student_ans original);
-   # my %previewKeys = qw(preview_text_string text preview_latex_string latex);
-   # my %correctKeys = qw(correct_value value correct_formula formula correct_ans ans);
-   # my %messageKeys = qw(ans_message answer error_message error);
-   # my @resultKeys  = qw(score weight);
-
 	# once the correct answers are shown, this setting is permanent
 	if ($inputs_ref->{showCorrectAnswers} && !$inputs_ref->{isInstructor}) {
 		$sessionHash->{showCorrectAnswers} = 1;
@@ -315,15 +297,8 @@ sub generateJWTs {
 	}
 
 	# store the current answer/response state for each entry
-	foreach my $ans (@{ $pg->{flags}{KEPT_EXTRA_ANSWERS} }) {
+	for my $ans (@{ $pg->{flags}{KEPT_EXTRA_ANSWERS} }) {
 		$sessionHash->{$ans} = $inputs_ref->{$ans};
-
-# More restructuring -- confirm with LibreTexts
-# $scoreHash->{$ans}{student} = { map {exists $answers{$ans}{$_} ? ($studentKeys{$_} => $answers{$ans}{$_}) : ()} keys %studentKeys };
-# $scoreHash->{$ans}{preview} = { map {exists $answers{$ans}{$_} ? ($previewKeys{$_} => $answers{$ans}{$_}) : ()} keys %previewKeys };
-# $scoreHash->{$ans}{correct} = { map {exists $answers{$ans}{$_} ? ($correctKeys{$_} => $answers{$ans}{$_}) : ()} keys %correctKeys };
-# $scoreHash->{$ans}{message} = { map {exists $answers{$ans}{$_} ? ($messageKeys{$_} => $answers{$ans}{$_}) : ()} keys %messageKeys };
-# $scoreHash->{$ans}{result}  = { map {exists $answers{$ans}{$_} ? ($_ => $answers{$ans}{$_}) : ()} @resultKeys };
 	}
 
 	# update the number of correct/incorrect submissions if answers were 'submitted'
@@ -338,19 +313,21 @@ sub generateJWTs {
 		: ($inputs_ref->{numIncorrect} // 0);
 
 	# create the session JWT
-	my $sessionJWT = encode_jwt(payload => $sessionHash, auto_iat => 1, alg => 'HS256', key => $ENV{webworkJWTsecret});
+	my $sessionJWT =
+		encode_jwt(payload => $sessionHash, auto_iat => 1, alg => 'HS256', key => $c->config->{webworkJWTsecret});
 
 	# form answerJWT
 	my $responseHash = {
-		iss        => $ENV{SITE_HOST},
+		iss        => $c->config->{SITE_HOST},
 		aud        => $inputs_ref->{JWTanswerURL},
 		score      => $scoreHash,
 		sessionJWT => $sessionJWT,
-		platform   => 'standaloneRenderer'
+		platform   => 'renderer'
 	};
 
 	# Can instead use alg => 'PBES2-HS512+A256KW', enc => 'A256GCM' for JWE
-	my $answerJWT = encode_jwt(payload => $responseHash, alg => 'HS256', key => $ENV{problemJWTsecret}, auto_iat => 1);
+	my $answerJWT =
+		encode_jwt(payload => $responseHash, alg => 'HS256', key => $c->config->{problemJWTsecret}, auto_iat => 1);
 	return ($sessionJWT, $answerJWT);
 }
 
@@ -371,7 +348,7 @@ sub pretty_print_rh {
 	if (ref($rh) =~ /HASH/) {
 		$out .= "{\n";
 		$indent++;
-		foreach my $key (sort keys %{$rh}) {
+		for my $key (sort keys %{$rh}) {
 			$out .= "  " x $indent . "$key => " . pretty_print_rh($rh->{$key}, $indent) . "\n";
 		}
 		$indent--;
@@ -393,18 +370,6 @@ sub pretty_print_rh {
 	}
 
 	return $out . " ";
-}
-
-sub writeRenderLogEntry($) {
-	my $message = shift;
-
-	local *LOG;
-	if (open LOG, ">>", $path_to_log_file) {
-		print LOG "[", time2str("%a %b %d %H:%M:%S %Y", time), "] $message\n";
-		close LOG;
-	} else {
-		warn "failed to open $path_to_log_file for writing: $!";
-	}
 }
 
 1;

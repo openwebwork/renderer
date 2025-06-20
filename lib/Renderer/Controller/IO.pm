@@ -1,6 +1,6 @@
 package Renderer::Controller::IO;
-use Mojo::Base -async_await;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
+
 use File::Spec::Functions qw(splitdir);
 use File::Find            qw(find);
 use MIME::Base64          qw(decode_base64);
@@ -37,7 +37,7 @@ sub raw {
 	return unless $validatedInput;
 
 	my $file_path = $validatedInput->{sourceFilePath};
-	my $problem   = $c->newProblem({ log => $c->log, read_path => $file_path });
+	my $problem   = $c->newProblem({ read_path => $file_path });
 	$problem->{action} = 'fetch source';
 	return $c->exception($problem->{_message}, $problem->{status})
 		unless $problem->success();
@@ -58,7 +58,6 @@ async sub writer {
 	return unless $validatedInput;
 
 	my $problem = $c->newProblem({
-		log              => $c->log,
 		write_path       => $validatedInput->{writeFilePath},
 		problem_contents => $validatedInput->{problemSource}
 	});
@@ -362,7 +361,7 @@ async sub findNewVersion {
 	my $avoidProblems = {};
 	$c->render_later;
 	for my $seed (@avoidSeeds) {
-		my $problem         = $c->newProblem({ log => $c->log, read_path => $filePath, random_seed => $seed });
+		my $problem         = $c->newProblem({ read_path => $filePath, random_seed => $seed });
 		my $renderedProblem = await $problem->render({});
 		next unless ($problem->success());
 		$avoidProblems->{$seed} = decode_json($renderedProblem);
@@ -375,7 +374,7 @@ async sub findNewVersion {
 			$newSeed = 1 + int rand(999999);
 		} until (!exists($avoidProblems->{$newSeed}));
 
-		my $newProblemObj  = $c->newProblem({ log => $c->log, read_path => $filePath, random_seed => $newSeed });
+		my $newProblemObj  = $c->newProblem({ read_path => $filePath, random_seed => $newSeed });
 		my $newProblemJson = await $newProblemObj->render({});
 		next unless ($newProblemObj->success());
 		$newProblem = decode_json($newProblemJson);
@@ -453,7 +452,7 @@ async sub findUniqueSeeds {
 		do {
 			$newSeed = 1 + int rand(999999);
 		} until (!exists($triedSeeds->{$newSeed}));
-		my $newProblemObj  = $c->newProblem({ log => $c->log, read_path => $filePath, random_seed => $newSeed });
+		my $newProblemObj  = $c->newProblem({ read_path => $filePath, random_seed => $newSeed });
 		my $newProblemJson = await $newProblemObj->render({});
 		next unless ($newProblemObj->success());
 		$newProblem = decode_json($newProblemJson);
@@ -519,7 +518,7 @@ async sub setTags {
 	# the same holds for keywords
 	$incomingTags->{keywords} = [ $incomingTags->{keywords} ] unless (ref($incomingTags->{keywords}) =~ /ARRAY/);
 
-	my $problem = $c->newProblem({ log => $c->log, read_path => $incomingTags->{file} });
+	my $problem = $c->newProblem({ read_path => $incomingTags->{file} });
 
 	# wrap the get/update/write tags in a promise
 	my $tags = WeBWorK::Utils::Tags->new($incomingTags->{file});
