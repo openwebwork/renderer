@@ -10,6 +10,7 @@ use WeBWorK::PreTeXt;
 sub parseRequest {
 	my $c      = shift;
 	my %params = %{ $c->req->params->to_hash };
+	$params{outputFormat} ||= $params{outputformat} || 'default';
 
 	my $originIP = $c->req->headers->header('X-Forwarded-For')
 		// '' =~ s!^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$!$1!r;

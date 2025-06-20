@@ -84,7 +84,7 @@ sub formatRenderedProblem {
 	);
 
 	# Get the requested format. (outputFormat or outputformat)
-	my $formatName = $inputs_ref->{outputFormat} || 'default';
+	my $formatName = $inputs_ref->{outputFormat} || $inputs_ref->{outputformat} || 'default';
 
 	# Add JS files requested by problems via ADD_JS_FILE() in the PG file.
 	my @extra_js_files;
