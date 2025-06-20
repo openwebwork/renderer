@@ -1,5 +1,5 @@
-%= stylesheet 'css/filebrowser.css'
-%= javascript 'js/filebrowser.js'
+%= stylesheet "$ENV{baseURL}/css/filebrowser.css"
+%= javascript "$ENV{baseURL}/js/filebrowser.js"
 
 <div class='header'>
     Current directory path: </br>

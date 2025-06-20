@@ -45,8 +45,8 @@ sub formatRenderedProblem {
 
 	# Third party CSS
 	my @third_party_css = map { getAssetURL($formLanguage, $_->[0]) } (
-		[ 'css/bootstrap.css', ],
-		[ 'node_modules/jquery-ui-dist/jquery-ui.min.css', ],
+		['css/bootstrap.css'],
+		['node_modules/jquery-ui-dist/jquery-ui.min.css'],
 		['node_modules/@fortawesome/fontawesome-free/css/all.min.css'],
 	);
 
@@ -54,9 +54,6 @@ sub formatRenderedProblem {
 	# or via a setting of $ce->{pg}{specialPGEnvironmentVars}{extra_css_files}
 	# which can be set in course.conf (the value should be an anonomous array).
 	my @cssFiles;
-	# if (ref($ce->{pg}{specialPGEnvironmentVars}{extra_css_files}) eq 'ARRAY') {
-	# 	push(@cssFiles, { file => $_, external => 0 }) for @{ $ce->{pg}{specialPGEnvironmentVars}{extra_css_files} };
-	# }
 	if (ref($rh_result->{flags}{extra_css_files}) eq 'ARRAY') {
 		push @cssFiles, @{ $rh_result->{flags}{extra_css_files} };
 	}
@@ -87,7 +84,7 @@ sub formatRenderedProblem {
 	);
 
 	# Get the requested format. (outputFormat or outputformat)
-	my $formatName = $inputs_ref->{outputFormat} || 'default';
+	my $formatName = $inputs_ref->{outputFormat} || $inputs_ref->{outputformat} || 'default';
 
 	# Add JS files requested by problems via ADD_JS_FILE() in the PG file.
 	my @extra_js_files;

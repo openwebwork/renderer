@@ -1,4 +1,4 @@
-%= javascript 'node_modules/@openwebwork/pg-codemirror-editor/dist/pg-codemirror-editor.js'
+%= javascript "$ENV{baseURL}/node_modules/\@openwebwork/pg-codemirror-editor/dist/pg-codemirror-editor.js"
 %= javascript 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'
 
 <div id='edit-header' class='header'>

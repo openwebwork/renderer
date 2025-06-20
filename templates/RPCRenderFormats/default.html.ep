@@ -4,7 +4,6 @@
 <html <%== $COURSE_LANG_AND_DIR %>>
 <head>
 	<meta charset='utf-8'>
-	<base href="<%= $SITE_URL %>">
 	<title>
 		WeBWorK using host: <%= $SITE_URL %>,
 		format: <%= $formatName %>,

@@ -212,9 +212,9 @@ sub standaloneRenderer {
 		showAttemptPreviews     => 1,                                     # display LaTeX version of submitted answer
 		showHints               => $showHints,                            # default is to showHint (set in PG.pm)
 		showSolutions           => $showSolutions,
-		showCorrectAnswers      => $inputs_ref->{showCorrectAnswers} ? 2 : 0,
-		num_of_correct_ans      => $inputs_ref->{numCorrect}   || 0,
-		num_of_incorrect_ans    => $inputs_ref->{numIncorrect} || 0,
+		showCorrectAnswers      => $inputs_ref->{showCorrectAnswers} && $displayResults || 0,
+		num_of_correct_ans      => $inputs_ref->{numCorrect}                            || 0,
+		num_of_incorrect_ans    => $inputs_ref->{numIncorrect}                          || 0,
 		displayMode             => $inputs_ref->{displayMode},
 		useMathQuill            => !defined $inputs_ref->{entryAssist} || $inputs_ref->{entryAssist} eq 'MathQuill',
 		answerPrefix            => $inputs_ref->{answerPrefix},
@@ -225,8 +225,8 @@ sub standaloneRenderer {
 		language                => $inputs_ref->{language} // 'en',
 		language_subroutine     => WeBWorK::Localize::getLoc($inputs_ref->{language} // 'en'),
 		templateDirectory       => "$ENV{RENDER_ROOT}/",
-		htmlURL                 => 'pg_files/',
-		tempURL                 => 'pg_files/tmp/',
+		htmlURL                 => '/pg_files/',
+		tempURL                 => '/pg_files/tmp/',
 		debuggingOptions        => {
 			show_resource_info          => $inputs_ref->{show_resource_info},
 			view_problem_debugging_info => $inputs_ref->{view_problem_debugging_info}
