@@ -1,4 +1,4 @@
-%= stylesheet 'css/opl-flex.css'
+%= stylesheet "$ENV{baseULR}/css/opl-flex.css"
 
 <div class="container">
   <div class="left">

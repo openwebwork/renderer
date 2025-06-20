@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <base href="<%= $main::basehref %>">
     <title>WeBWorK Standalone Renderer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    %= stylesheet 'css/navbar.css'
+    %= stylesheet "$ENV{baseURL}/css/navbar.css"
   </head>
   <body>
     <div class="topnav" id="myTopnav">
@@ -29,6 +28,6 @@
       </div>
     </div>
     <%= content %>
-    %= javascript 'js/navbar.js'
+    %= javascript "$ENV{baseURL}/js/navbar.js"
   </body>
 </html>

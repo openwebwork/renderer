@@ -1,4 +1,4 @@
-%= stylesheet 'css/tags.css'
+%= stylesheet "$ENV{baesURL}/css/tags.css"
 
 % my $taxo = '';
 % if ( open(TAXONOMY, "<:encoding(utf8)", $c->app->home->child('tmp/tagging-taxonomy.json')) ) {
@@ -79,7 +79,7 @@
         </div>
     </div>
     <div class = 'form-row'>
-        %= submit_button 'Save Tags' 
+        %= submit_button 'Save Tags'
     </div>
     %= end
 </div>
@@ -87,4 +87,4 @@
 %= javascript begin
 taxo = <%== $taxo %>;
 %= end
-%= javascript 'js/tags.js'
+%= javascript "$ENV{baseURL}/js/tags.js"

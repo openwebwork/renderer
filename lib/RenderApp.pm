@@ -43,6 +43,9 @@ sub startup {
 
 	sanitizeHostURLs();
 
+	# Remove default public directory from static route.
+	pop @{ $self->static->paths };
+
 	print "Renderer is based at $main::basehref\n";
 	print "Problem attempts will be sent to $main::formURL\n";
 
@@ -199,12 +202,10 @@ sub sanitizeHostURLs {
 		$ENV{baseURL} = '';
 	} elsif ($ENV{baseURL} =~ m!\S!) {
 
-		# ENV{baseURL} is used to build routes, so configure as "/extension"
-		$ENV{baseURL} = "/$ENV{baseURL}";
-		warn "*** [CONFIG] baseURL should not end in a slash\n"
-			if $ENV{baseURL} =~ s!/$!!;
-		warn "*** [CONFIG] baseURL should begin with a slash\n"
-			unless $ENV{baseURL} =~ s!^//!/!;
+		# ENV{baseURL} is used to build routes, so configure as "/extension".
+		# Ensure ENV{baseURL} starts with a slash but doesn't end with a slash.
+		$ENV{baseURL} = "/$ENV{baseURL}" unless $ENV{baseURL} =~ m!^/!;
+		$ENV{baseURL} =~ s!/$!!;
 
 		# base href must end in a slash when not hosting at the root
 		$main::basehref =

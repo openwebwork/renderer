@@ -49,7 +49,7 @@ sub getThirdPartyAssetURL {
 					. substr($dependencies->{$_}, 1) . '/'
 					. ($1 =~ s/(?:\.min)?\.(js|css)$/.min.$1/gr);
 			} else {
-				return Mojo::URL->new("${baseURL}$file")->query(version => $dependencies->{$_})->to_string;
+				return Mojo::URL->new("$baseURL/$file")->query(version => $dependencies->{$_})->to_string;
 			}
 		}
 	}
@@ -99,10 +99,10 @@ sub getAssetURL {
 	# If so, then either serve it from a CDN if requested, or serve it directly with the library version
 	# appended as a URL parameter.
 	if ($file =~ /^node_modules/) {
-		my $wwFile = getThirdPartyAssetURL($file, $thirdPartyWWDependencies, '', 0);
+		my $wwFile = getThirdPartyAssetURL($file, $thirdPartyWWDependencies, $ENV{baseURL}, 0);
 		return $wwFile if $wwFile;
 
-		my $pgFile = getThirdPartyAssetURL($file, $thirdPartyPGDependencies, '/pg_files/', 0);
+		my $pgFile = getThirdPartyAssetURL($file, $thirdPartyPGDependencies, "$ENV{baseURL}/pg_files", 0);
 		return $pgFile if $pgFile;
 	}
 
@@ -114,21 +114,22 @@ sub getAssetURL {
 		: undef;
 
 	# First check to see if this is a file in the webwork htdocs location with a rtl variant.
-	return "$staticWWAssets->{$rtlfile}"
+	return "$ENV{baseURL}/$staticWWAssets->{$rtlfile}"
 		if defined $rtlfile && defined $staticWWAssets->{$rtlfile};
 
 	# Next check to see if this is a file in the webwork htdocs location.
-	return "$staticWWAssets->{$file}" if defined $staticWWAssets->{$file};
+	return "$ENV{baseURL}/$staticWWAssets->{$file}" if defined $staticWWAssets->{$file};
 
 	# Now check to see if this is a file in the pg htdocs location with a rtl variant.
-	return "/pg_files/$staticPGAssets->{$rtlfile}" if defined $rtlfile && defined $staticPGAssets->{$rtlfile};
+	return "$ENV{baseURL}/pg_files/$staticPGAssets->{$rtlfile}"
+		if defined $rtlfile && defined $staticPGAssets->{$rtlfile};
 
 	# Next check to see if this is a file in the pg htdocs location.
-	return "/pg_files/$staticPGAssets->{$file}" if defined $staticPGAssets->{$file};
+	return "$ENV{baseURL}/pg_files/$staticPGAssets->{$file}" if defined $staticPGAssets->{$file};
 
 	# If the file was not found in the lists, then just use the given file and assume its path is relative to the
 	# render app public folder.
-	return "$file";
+	return "$ENV{baseURL}/$file";
 }
 
 1;
