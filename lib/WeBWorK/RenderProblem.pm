@@ -212,9 +212,9 @@ sub standaloneRenderer {
 		showAttemptPreviews     => 1,                                     # display LaTeX version of submitted answer
 		showHints               => $showHints,                            # default is to showHint (set in PG.pm)
 		showSolutions           => $showSolutions,
-		showCorrectAnswers      => $inputs_ref->{showCorrectAnswers} || 0,
-		num_of_correct_ans      => $inputs_ref->{numCorrect}         || 0,
-		num_of_incorrect_ans    => $inputs_ref->{numIncorrect}       || 0,
+		showCorrectAnswers      => $inputs_ref->{showCorrectAnswers} && $displayResults || 0,
+		num_of_correct_ans      => $inputs_ref->{numCorrect}                            || 0,
+		num_of_incorrect_ans    => $inputs_ref->{numIncorrect}                          || 0,
 		displayMode             => $inputs_ref->{displayMode},
 		useMathQuill            => !defined $inputs_ref->{entryAssist} || $inputs_ref->{entryAssist} eq 'MathQuill',
 		answerPrefix            => $inputs_ref->{answerPrefix},
