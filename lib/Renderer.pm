@@ -1,29 +1,15 @@
 package Renderer;
 use Mojo::Base 'Mojolicious';
 
+use Mojo::File;
+use Env qw(RENDER_ROOT PG_ROOT baseURL);
+use Date::Format;
+
 BEGIN {
-	use Mojo::File;
-	$main::libname = Mojo::File::curfile->dirname;
-
-	# RENDER_ROOT is required for initializing conf files.
-	$ENV{RENDER_ROOT} = $main::libname->dirname
-		unless (defined($ENV{RENDER_ROOT}));
-
-	# PG_ROOT is required for PG/lib/PGEnvironment.pm
-	$ENV{PG_ROOT} = $main::libname . '/PG';
-
-	# Used for reconstructing library paths from sym-links.
-	$ENV{OPL_DIRECTORY} = "$ENV{RENDER_ROOT}/webwork-open-problem-library";
-
-	$ENV{MOJO_CONFIG} =
-		(-r "$ENV{RENDER_ROOT}/renderer.conf")
-		? "$ENV{RENDER_ROOT}/renderer.conf"
-		: "$ENV{RENDER_ROOT}/renderer.conf.dist";
-	$ENV{MOJO_LOG_LEVEL} = 'debug';
+	# RENDER_ROOT and PG_ROOT are required for the WeBWorK::PG::Environment.
+	$RENDER_ROOT = Mojo::File::curfile->dirname->dirname;
+	$PG_ROOT     = Mojo::File::curfile->dirname->child('PG');
 }
-
-use lib "$main::libname";
-print "using root directory: $ENV{RENDER_ROOT}\n";
 
 use Renderer::Model::Problem;
 use Renderer::Controller::IO;
@@ -32,18 +18,18 @@ use WeBWorK::FormatRenderedProblem;
 sub startup {
 	my $self = shift;
 
-	# Merge environment variables with config file
 	$self->plugin('Config');
-	$self->plugin('TagHelpers');
 	$self->secrets($self->config('secrets'));
-	for (qw(problemJWTsecret webworkJWTsecret baseURL formURL SITE_HOST STRICT_JWT)) {
-		$ENV{$_} //= $self->config($_);
-	}
 
-	sanitizeHostURLs();
+	$self->sanitizeHostURLs;
 
-	print "Renderer is based at $main::basehref\n";
-	print "Problem attempts will be sent to $main::formURL\n";
+	# This is also required for the WeBWorK::PG::Environment, but is not needed at compile time.
+	$baseURL = $self->config->{baseURL};
+
+	say 'Renderer is based at ' . $self->defaults->{baseHREF};
+	say 'Problem attempts will be sent to ' . $self->defaults->{formURL};
+
+	$self->plugin('Renderer::Plugin::Assets');
 
 	# Handle optional CORS settings
 	if (my $CORS_ORIGIN = $self->config('CORS_ORIGIN')) {
@@ -63,8 +49,8 @@ sub startup {
 
 	# Logging
 	if ($ENV{MOJO_MODE} && $ENV{MOJO_MODE} eq 'production') {
-		my $logPath = "$ENV{RENDER_ROOT}/logs/error.log";
-		print "[LOGS] Running in production mode, logging to $logPath\n";
+		my $logPath = $self->home->child('logs', 'error.log');
+		say "[LOGS] Running in production mode, logging to $logPath";
 		$self->log(Mojo::Log->new(
 			path  => $logPath,
 			level => ($ENV{MOJO_LOG_LEVEL} || 'warn')
@@ -72,33 +58,53 @@ sub startup {
 	}
 
 	if ($self->config('INTERACTION_LOG')) {
-		my $interactionLogPath = "$ENV{RENDER_ROOT}/logs/interactions.log";
-		print "[LOGS] Saving interactions to $interactionLogPath\n";
+		my $interactionLogPath = $self->home->child('logs', 'interactions.log');
+		say "[LOGS] Saving interactions to $interactionLogPath";
 		my $resultsLog = Mojo::Log->new(path => $interactionLogPath, level => 'info');
 		$resultsLog->format(sub {
 			my ($time, $level, @lines) = @_;
 			my $start = shift(@lines);
-			my $msg   = join ", ", @lines;
-			return sprintf "%s, %s, %s\n", $start, $time - $start, $msg;
+			return sprintf "%s, %s, %s\n", $start, $time - $start, join(', ', @lines);
 		});
 		$self->helper(logAttempt => sub { shift; $resultsLog->info(@_); });
 	}
 
+	my $resourceUsageLog = Mojo::Log->new(path => $self->home->child('logs', 'resource_usage.log'));
+	$resourceUsageLog->format(sub {
+		my ($time, $level, @lines) = @_;
+		return '[' . time2str('%a %b %d %H:%M:%S %Y', time) . '] ' . join(', ', @lines) . "\n";
+	});
+	$self->helper(resourceUsageLog => sub { shift; return $resourceUsageLog->info(@_); });
+
 	# Models
-	$self->helper(newProblem => sub { shift; Renderer::Model::Problem->new(@_) });
+	$self->helper(newProblem => sub { my ($c, $args) = @_; Renderer::Model::Problem->new($c, $args) });
 
 	# Helpers
-	$self->helper(format          => sub { WeBWorK::FormatRenderedProblem::formatRenderedProblem(@_) });
-	$self->helper(validateRequest => sub { Renderer::Controller::IO::validate(@_) });
-	$self->helper(parseRequest    => sub { Renderer::Controller::Render::parseRequest(@_) });
-	$self->helper(croak           => sub { Renderer::Controller::Render::croak(@_) });
-	$self->helper(logID           => sub { shift->req->request_id });
-	$self->helper(exception       => sub { Renderer(@_) });
+	$self->helper(
+		format => sub {
+			my ($c, $rh_result) = @_;
+			WeBWorK::FormatRenderedProblem::formatRenderedProblem($c, $rh_result);
+		}
+	);
+	$self->helper(validateRequest => sub { my ($c, $options) = @_; Renderer::Controller::IO::validate($c, $options) });
+	$self->helper(parseRequest => sub { my $c = shift; Renderer::Controller::Render::parseRequest($c) });
+	$self->helper(
+		croak => sub {
+			my ($c, $exception, $depth) = @_;
+			Renderer::Controller::Render::croak($c, $exception, $depth);
+		}
+	);
+	$self->helper(logID => sub { my $c = shift; $c->req->request_id });
+	$self->helper(
+		exception => sub {
+			my ($c, $message, $status, %data) = @_;
+			Renderer::Controller::Render::exception($c, $message, $status, %data);
+		}
+	);
 
 	# Routes
-	# baseURL sets the root at which the renderer is listening,
-	# and is used in Environment for pg_root_url
-	my $r = $self->routes->under($ENV{baseURL});
+	# baseURL is the root at which the renderer is listening.
+	my $r = $self->routes->under($self->config->{baseURL});
 
 	$r->any('/render-api')->to('render#problem');
 	$r->any('/render-ptx')->to('render#render_ptx');
@@ -108,10 +114,12 @@ sub startup {
 	supplementalRoutes($r) if ($self->mode eq 'development' || $self->config('FULL_APP_INSECURE'));
 
 	# Static file routes
-	$r->any('/pg_files/CAPA_Graphics/*static')->to('StaticFiles#CAPA_graphics_file');
-	$r->any('/pg_files/tmp/*static')->to('StaticFiles#temp_file');
-	$r->any('/pg_files/*static')->to('StaticFiles#pg_file');
-	$r->any('/*static')->to('StaticFiles#public_file');
+	$r->any('/pg_files/CAPA_Graphics/*static')->to('StaticFiles#CAPA_graphics_file')->name('capaFile');
+	$r->any('/pg_files/tmp/*static')->to('StaticFiles#temp_file')->name('pgTempFile');
+	$r->any('/pg_files/*static')->to('StaticFiles#pg_file')->name('pgFile');
+	$r->any('/*static')->to('StaticFiles#public_file')->name('publicFile');
+
+	return;
 }
 
 sub supplementalRoutes {
@@ -156,45 +164,40 @@ sub timeout {
 }
 
 sub sanitizeHostURLs {
-	$ENV{SITE_HOST} =~ s!/$!!;
+	my $self = shift;
 
-	# set an absolute base href for asset urls under iframe embedding
-	if ($ENV{baseURL} =~ m!^https?://!) {
+	$self->config->{SITE_HOST} =~ s!/$!!;
 
-		# this should only be used by MITM sites when proxying renderer assets
-		my $baseURL = $ENV{baseURL} =~ m!/$! ? $ENV{baseURL} : "$ENV{baseURL}/";
-		$main::basehref = Mojo::URL->new($baseURL);
+	# Set an absolute base href for asset urls under iframe embedding.
+	if ($self->config->{baseURL} =~ m!^https?://!) {
+		# This should only be used by MITM sites when proxying renderer assets.
+		my $baseURL = $self->config->{baseURL} =~ m!/$! ? $self->config->{baseURL} : $self->config->{baseURL} . '/';
+		$self->defaults->{baseHREF} = Mojo::URL->new($baseURL);
 
-		# do NOT use the proxy address in our router!
-		$ENV{baseURL} = '';
-	} elsif ($ENV{baseURL} =~ m!\S!) {
+		# Do NOT use the proxy address for the router!
+		$self->config->{baseURL} = '';
+	} elsif ($self->config->{baseURL} =~ m!\S!) {
+		# Ensure baseURL starts with a slash but doesn't end with a slash.
+		$self->config->{baseURL} = '/' . $self->config->{baseURL} unless $self->config->{baseURL} =~ m!^/!;
+		$self->config->{baseURL} =~ s!/$!!;
 
-		# ENV{baseURL} is used to build routes, so configure as "/extension"
-		$ENV{baseURL} = "/$ENV{baseURL}";
-		warn "*** [CONFIG] baseURL should not end in a slash\n"
-			if $ENV{baseURL} =~ s!/$!!;
-		warn "*** [CONFIG] baseURL should begin with a slash\n"
-			unless $ENV{baseURL} =~ s!^//!/!;
-
-		# base href must end in a slash when not hosting at the root
-		$main::basehref =
-			Mojo::URL->new($ENV{SITE_HOST})->path("$ENV{baseURL}/");
+		# base href must end in a slash when not hosting at the root.
+		$self->defaults->{baseHREF} = Mojo::URL->new($self->config->{SITE_HOST})->path($self->config->{baseURL} . '/');
 	} else {
 		# no proxy and service is hosted at the root of SITE_HOST
-		$main::basehref = Mojo::URL->new($ENV{SITE_HOST});
+		$self->defaults->{baseHREF} = Mojo::URL->new($self->config->{SITE_HOST});
 	}
 
-	if ($ENV{formURL} =~ m!\S!) {
-
+	if ($self->config->{formURL} =~ m!\S!) {
 		# this should only be used by MITM
-		$main::formURL = Mojo::URL->new($ENV{formURL});
+		$self->defaults->{formURL} = Mojo::URL->new($self->config->{formURL});
 		die '*** [CONFIG] if provided, formURL must be absolute'
-			unless $main::formURL->is_abs;
+			unless $self->defaults->{formURL}->is_abs;
 	} else {
 		# if using MITM proxy base href + renderer api not at SITE_HOST root
 		# provide form url as absolute SITE_HOST/extension/render-api
-		$main::formURL =
-			Mojo::URL->new($ENV{SITE_HOST})->path("$ENV{baseURL}/render-api");
+		$self->defaults->{formURL} =
+			Mojo::URL->new($self->config->{SITE_HOST})->path($self->config->{baseURL} . '/render-api');
 	}
 }
 

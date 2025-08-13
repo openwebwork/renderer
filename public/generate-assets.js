@@ -196,7 +196,7 @@ const processFile = async (file, _details) => {
 	if (ready) fs.writeFileSync(assetFile, JSON.stringify(assets));
 };
 
-const jsDir = path.resolve(__dirname, 'js/apps');
+const jsDir = path.resolve(__dirname, 'js');
 const cssDir = path.resolve(__dirname, 'css');
 
 // Remove generated files from previous builds.
@@ -208,7 +208,7 @@ if (argv.clean) process.exit();
 // Set up the watcher.
 if (argv.watchFiles) console.log('\x1b[32mEstablishing watches and performing initial build.\x1b[0m');
 chokidar
-	.watch(['js/apps', 'css'], {
+	.watch(['js', 'css'], {
 		ignored: /layouts|\.min\.(js|css)$/,
 		cwd: __dirname, // Make sure all paths are given relative to the htdocs directory.
 		usePolling: true, // Needed to get changes to symlinks.

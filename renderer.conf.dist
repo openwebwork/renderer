@@ -9,6 +9,9 @@
   STRICT_JWT => 0,
   FULL_APP_INSECURE => 0,
   INTERACTION_LOG => 0,
+  thirdPartyAssetsUseCDN => 0,
+  language => 'en',
+
   hypnotoad => {
     listen => ['http://*:3000'],
     accepts => 400,

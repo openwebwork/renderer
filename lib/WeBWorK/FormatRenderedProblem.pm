@@ -16,7 +16,6 @@ use Mojo::DOM;
 use Mojo::URL;
 
 use WeBWorK::Localize;
-use WeBWorK::Utils qw(getAssetURL);
 use WeBWorK::Utils::LanguageAndDirection;
 
 sub formatRenderedProblem {
@@ -35,28 +34,23 @@ sub formatRenderedProblem {
 	}
 
 	# TODO: add configuration to disable these overrides
-	my $SITE_URL        = $inputs_ref->{baseURL} ? Mojo::URL->new($inputs_ref->{baseURL}) : $main::basehref;
-	my $FORM_ACTION_URL = $inputs_ref->{formURL} ? Mojo::URL->new($inputs_ref->{formURL}) : $main::formURL;
+	my $SITE_URL        = $inputs_ref->{baseURL} ? Mojo::URL->new($inputs_ref->{baseURL}) : $c->stash->{baseHREF};
+	my $FORM_ACTION_URL = $inputs_ref->{formURL} ? Mojo::URL->new($inputs_ref->{formURL}) : $c->stash->{formURL};
 
 	my $displayMode = $inputs_ref->{displayMode} // 'MathJax';
 
 	# HTML document language setting
-	my $formLanguage = $inputs_ref->{language} // 'en';
+	my $formLanguage = $inputs_ref->{language} // $c->config->{language};
 
 	# Third party CSS
-	my @third_party_css = map { getAssetURL($formLanguage, $_->[0]) } (
-		[ 'css/bootstrap.css', ],
-		[ 'node_modules/jquery-ui-dist/jquery-ui.min.css', ],
+	my @third_party_css = map { $c->getAssetURL($_->[0], $formLanguage) } (
+		['css/bootstrap.css'],
+		['node_modules/jquery-ui-dist/jquery-ui.min.css'],
 		['node_modules/@fortawesome/fontawesome-free/css/all.min.css'],
 	);
 
-	# Add CSS files requested by problems via ADD_CSS_FILE() in the PG file
-	# or via a setting of $ce->{pg}{specialPGEnvironmentVars}{extra_css_files}
-	# which can be set in course.conf (the value should be an anonomous array).
+	# Add CSS files requested by problems via ADD_CSS_FILE() in the PG file.
 	my @cssFiles;
-	# if (ref($ce->{pg}{specialPGEnvironmentVars}{extra_css_files}) eq 'ARRAY') {
-	# 	push(@cssFiles, { file => $_, external => 0 }) for @{ $ce->{pg}{specialPGEnvironmentVars}{extra_css_files} };
-	# }
 	if (ref($rh_result->{flags}{extra_css_files}) eq 'ARRAY') {
 		push @cssFiles, @{ $rh_result->{flags}{extra_css_files} };
 	}
@@ -68,22 +62,22 @@ sub formatRenderedProblem {
 		if ($_->{external}) {
 			push(@extra_css_files, $_);
 		} else {
-			push(@extra_css_files, { file => getAssetURL($formLanguage, $_->{file}), external => 0 });
+			push(@extra_css_files, { file => $c->getAssetURL($_->{file}, $formLanguage), external => 0 });
 		}
 	}
 
 	# Third party JavaScript
 	# The second element is a hash containing the necessary attributes for the script tag.
-	my @third_party_js = map { [ getAssetURL($formLanguage, $_->[0]), $_->[1] ] } (
+	my @third_party_js = map { [ $c->getAssetURL($_->[0], $formLanguage), $_->[1] ] } (
 		[ 'node_modules/jquery/dist/jquery.min.js',                            {} ],
 		[ 'node_modules/jquery-ui-dist/jquery-ui.min.js',                      {} ],
 		[ 'node_modules/iframe-resizer/js/iframeResizer.contentWindow.min.js', {} ],
-		[ "js/apps/MathJaxConfig/mathjax-config.js",                { defer => undef } ],
+		[ "js/MathJaxConfig/mathjax-config.js",                     { defer => undef } ],
 		[ 'node_modules/mathjax/es5/tex-svg.js',                    { defer => undef, id => 'MathJax-script' } ],
 		[ 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', { defer => undef } ],
-		[ "js/apps/Problem/problem.js",                             { defer => undef } ],
-		[ "js/apps/Problem/submithelper.js",                        { defer => undef } ],
-		[ "js/apps/CSSMessage/css-message.js",                      { defer => undef } ],
+		[ "js/Problem/problem.js",                                  { defer => undef } ],
+		[ "js/Problem/submithelper.js",                             { defer => undef } ],
+		[ "js/CSSMessage/css-message.js",                           { defer => undef } ],
 	);
 
 	# Get the requested format. (outputFormat or outputformat)
@@ -103,7 +97,7 @@ sub formatRenderedProblem {
 				push(
 					@extra_js_files,
 					{
-						file       => getAssetURL($formLanguage, $_->{file}),
+						file       => $c->getAssetURL($_->{file}, $formLanguage),
 						external   => 0,
 						attributes => $_->{attributes}
 					}
@@ -209,7 +203,7 @@ sub formatRenderedProblem {
 		template => $formatName eq 'ptx' ? 'RPCRenderFormats/ptx' : 'RPCRenderFormats/default',
 		$formatName eq 'json' ? (format => 'json') : (),
 		formatName               => $formatName,
-		lh                       => WeBWorK::Localize::getLangHandle($inputs_ref->{language} // 'en'),
+		lh                       => WeBWorK::Localize::getLangHandle($formLanguage),
 		rh_result                => $rh_result,
 		SITE_URL                 => $SITE_URL,
 		FORM_ACTION_URL          => $FORM_ACTION_URL,

@@ -41,21 +41,14 @@ our $codes = {
 };
 
 sub new {
-	my $class       = shift;
-	my $problem_ref = {
+	my ($class, $c, $args) = @_;
+	my $self = bless {
+		c           => $c,
 		_error      => '',
 		action      => '',
 		code_origin => '',
-	};
-	bless $problem_ref, $class;
-	$problem_ref->{start} = time;
-	$problem_ref->_init(@_);
-	return $problem_ref;
-}
-
-sub _init {
-	my ($self, $args) = @_;
-	$self->{log} = $args->{log} if $args->{log};
+		start       => time
+	}, $class;
 
 	my $read_path        = $args->{read_path}        || '';
 	my $write_path       = $args->{write_path}       || '';
@@ -80,8 +73,12 @@ sub _init {
 
 	my $path_info = $self->{code_origin};
 	my $seed_info = $args->{random_seed} ? "random seed #" . $args->{random_seed} : "no random seed.";
-	$self->{log}->info("CREATED: Problem created from $path_info with $seed_info");
+	$self->c->log->info("CREATED: Problem created from $path_info with $seed_info");
+
+	return $self;
 }
+
+sub c { my $self = shift; return $self->{c}; }
 
 sub source {
 	my $self = shift;
@@ -110,18 +107,19 @@ sub seed {
 	return $self->{random_seed};
 }
 
+my $oplRoot = Mojo::File::curfile->dirname->dirname->dirname->dirname->child('webwork-open-problem-library');
+
 sub path {
 	my $self = shift;
 	if (scalar(@_) >= 1) {
 		my $read_path = shift;
 		my $force     = shift if @_;
 		$read_path =~ s!\s+|\.\./!!g;    # prevent backtracking and whitespace
-		my $opl_root = $ENV{OPL_DIRECTORY};
 		if ($read_path =~ m!^Library/!) {
-			$read_path =~ s!^Library/!$opl_root/OpenProblemLibrary/!;
+			$read_path =~ s!^Library/!$oplRoot/OpenProblemLibrary/!;
 			$self->{write_allowed} = 0;
 		} elsif ($read_path =~ m!^Contrib!) {
-			$read_path =~ s!^Contrib/!$opl_root/Contrib/!;
+			$read_path =~ s!^Contrib/!$oplRoot/Contrib/!;
 			$self->{write_allowed} = 0;    # eventually reconsider this?
 		} else {
 			# TODO: consider steps in pipeline towards OPL
@@ -144,11 +142,10 @@ sub target {
 	if (scalar(@_) == 1) {
 		my $write_path = shift;
 		$write_path =~ s!\s+|\.\./!!g;    # prevent backtracking and whitespace
-		my $opl_root = $ENV{OPL_DIRECTORY};
 		if ($write_path =~ m!^Library/!) {
-			$write_path =~ s!^Library/!$opl_root/OpenProblemLibrary/!;
+			$write_path =~ s!^Library/!$oplRoot/OpenProblemLibrary/!;
 		} elsif ($write_path =~ m!^Contrib!) {
-			$write_path =~ s!^Contrib/!$opl_root/Contrib/!;
+			$write_path =~ s!^Contrib/!$oplRoot/Contrib/!;
 		}
 
 		# TODO: include permission check to write to this path...
@@ -223,7 +220,7 @@ sub render {
 
 sub success {
 	my $self = shift;
-	$self->{log}->error($self->{exception}) if ($self->{log} && $self->{exception});
+	$self->c->log->error($self->{exception}) if $self->{exception};
 	my $report = ($self->{_error} =~ /\S/) ? $self->{_error} : 'NO ERRORS';
 	return 1 unless $self->{_error} =~ /\S/;
 	my ($code, $mesg) = split(/ /, $self->{_error}, 2);
@@ -240,9 +237,9 @@ sub DESTROY {
 	$logmsg .= $self->{action} . ' from ';
 	$logmsg .= $self->{code_origin};
 	if ($self->{_error} && $self->{_error} =~ /\S/) {
-		$self->{log}->error("$logmsg failed with error: " . $self->{_error});
+		$self->c->log->error("$logmsg failed with error: " . $self->{_error});
 	} else {
-		$self->{log}->info("$logmsg succeeded.");
+		$self->c->log->info("$logmsg succeeded.");
 	}
 }
 

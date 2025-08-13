@@ -15,8 +15,9 @@ sub parseRequest {
 		// '' =~ s!^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$!$1!r;
 	$originIP ||= $c->tx->remote_address || 'unknown-origin';
 
-	if ($ENV{STRICT_JWT} && !(defined $params{problemJWT} || defined $params{sessionJWT})) {
-		return $c->exception('Not allowed to request problems with raw data.', 403);
+	if ($c->config->{STRICT_JWT} && !(defined $params{problemJWT} || defined $params{sessionJWT})) {
+		$c->exception('Not allowed to request problems with raw data.', 403);
+		return;
 	}
 
 	# protect against DOM manipulation
@@ -41,8 +42,8 @@ sub parseRequest {
 		eval {
 			$claims = decode_jwt(
 				token      => $sessionJWT,
-				key        => $ENV{webworkJWTsecret},
-				verify_iss => $ENV{SITE_HOST},
+				key        => $c->config->{webworkJWTsecret},
+				verify_iss => $c->config->{SITE_HOST},
 			);
 			1;
 		} or do {
@@ -65,8 +66,8 @@ sub parseRequest {
 		eval {
 			$claims = decode_jwt(
 				token      => $problemJWT,
-				key        => $ENV{problemJWTsecret},
-				verify_aud => $ENV{SITE_HOST},
+				key        => $c->config->{problemJWTsecret},
+				verify_aud => $c->config->{SITE_HOST},
 			);
 			1;
 		} or do {
@@ -78,12 +79,12 @@ sub parseRequest {
 		@params{ keys %$claims } = values %$claims;
 	} elsif ($params{outputFormat} ne 'ptx') {
 		# if no JWT is provided, create one (unless this is a pretext request)
-		$params{aud} = $ENV{SITE_HOST};
+		$params{aud} = $c->config->{SITE_HOST};
 		$params{isInstructor} //= 0;
 		$params{sessionID} ||= time;
 		my $req_jwt = encode_jwt(
 			payload  => \%params,
-			key      => $ENV{problemJWTsecret},
+			key      => $c->config->{problemJWTsecret},
 			alg      => 'PBES2-HS512+A256KW',
 			enc      => 'A256GCM',
 			auto_iat => 1
@@ -156,7 +157,6 @@ async sub problem {
 	}
 
 	my $problem = $c->newProblem({
-		log              => $c->log,
 		read_path        => $file_path,
 		random_seed      => $random_seed,
 		problem_contents => $problem_contents
@@ -232,7 +232,7 @@ async sub sendAnswerJWT {
 		message => 'initial message'
 	};
 	my $header = {
-		Origin         => $ENV{SITE_HOST},
+		Origin         => $c->config->{SITE_HOST},
 		'Content-Type' => 'text/plain',
 	};
 
@@ -304,10 +304,10 @@ sub jweFromRequest {
 	my $c          = shift;
 	my $inputs_ref = $c->parseRequest;
 	return unless $inputs_ref;
-	$inputs_ref->{aud} = $ENV{SITE_HOST};
+	$inputs_ref->{aud} = $c->config->{SITE_HOST};
 	my $req_jwt = encode_jwt(
 		payload  => $inputs_ref,
-		key      => $ENV{problemJWTsecret},
+		key      => $c->config->{problemJWTsecret},
 		alg      => 'PBES2-HS512+A256KW',
 		enc      => 'A256GCM',
 		auto_iat => 1
@@ -319,10 +319,10 @@ sub jwtFromRequest {
 	my $c          = shift;
 	my $inputs_ref = $c->parseRequest;
 	return unless $inputs_ref;
-	$inputs_ref->{aud} = $ENV{SITE_HOST};
+	$inputs_ref->{aud} = $c->config->{SITE_HOST};
 	my $req_jwt = encode_jwt(
 		payload  => $inputs_ref,
-		key      => $ENV{problemJWTsecret},
+		key      => $c->config->{problemJWTsecret},
 		alg      => 'HS256',
 		auto_iat => 1
 	);
